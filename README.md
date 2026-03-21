@@ -13,7 +13,7 @@ Through a collaboration between myself and AI contributors over several weeks, t
 ## 🚀 Key Features
 
 *   **Engineered with Robocopy**: Utilizes the high-performance Windows `robocopy` engine. By using the multi-threaded (`/MT`) flag, it bypasses the single-threaded limitations of standard File Explorer, moving data significantly faster.
-*   **Data-Driven Logic (Master Database)**: At the core is a 130-entry "Smart Database" that acts as a **Tag List**, defining system behavior:
+*   **Data-Driven Logic (Master Database)**: At the core is a 140-entry "Smart Database" that acts as a **Tag List**, defining system behavior:
     *   **OS-Specific Flags**: Tailors folder generation for **ArkOS**, **dArkOS**, or **dArkOS-RE**.
     *   **Subfolder Intelligence**: Correctly handles complex nested paths like `psp/ppsspp` or `ports/xash3d`.
     *   **Excel-Ready**: Generates 100-character wide, pipe-separated reports (`sep=|`) for easy inventory and Excel import.
@@ -53,6 +53,8 @@ This project is licensed under the **MIT License**.
 
 
 ## ☕ Support the Project
+If You or someone you know is a "Power" PowerShell user, feel free to contribute code and suggestions for improvement.
+
 If "The Vortex" saved you some time or made your handheld setup easier, feel free to help keep the gears turning!
 
 * [**Support via Ko-fi**](https://ko-fi.com/kofisupporter19535)
