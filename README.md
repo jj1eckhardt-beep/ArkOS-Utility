@@ -1,8 +1,8 @@
-# 🕹️ R36S & G350 File Manager
-### *"The Vortex" - High-Speed Handheld Migration Engine*
+# 🕹️ ARKOS UTILITY
+### *"High-Speed Handheld Migration Engine*
 
 ## 📖 The Story
-I am a builder, tinkerer, technician, and SBC enthusiast. My journey into "The Vortex" of retro handhelds began when my kids brought home a **BatleXP G350**. I quickly added an **R36S** (The Raspberry Pi of handhelds) to my collection and started the cycle of flashing OS images and testing different builds.
+I am a builder, tinkerer, technician, and SBC enthusiast. My journey into "The Vortex" of retro handhelds began when my kids brought home a **BatleXP G350**. I was impressed.  I quickly added an **R36S** (The Raspberry Pi of handhelds) to my collection and started the cycle of flashing OS images and testing different builds.
 
 I soon realized that after every fresh flash, the task of copying a massive library of games back to the SD card was tedious and time-consuming. I asked a simple question: *"You know what would be nice? A script that automated this process from a master library..."*
 
@@ -19,15 +19,14 @@ Through a collaboration between AI contributors and myself over several weeks, t
     *   **Excel-Ready**: Generates 100-character wide, pipe-separated reports (`sep=|`) for easy inventory and Excel import.
 *   **G350 Source (Set as MASTER)**: Automatically filters 170+ "junk" folders from stock G350 cards and safely appends them to a clean ArkOS structure.
 *   **Universal Sync**: A "Safe" copy engine that only moves missing or newer files.
-*   **Power Clone**: A "Brute Force" mirror that selectively makes the Target an exact replica of the Master.
-*   **Abort Kill-Switch**: Instantly terminates active Robocopy processes if you need to stop an operation.
+*   **Power Clone**: A "Brute Force" mirror that selectively makes the Target a conditional copy of the Master.
+*   **Abort Kill-Switch**: Instantly Halts/Pauses the active Robocopy processes if you need to stop an operation.  You can then quit or resume.
 
-<img width="1354" height="1009" alt="Image" src="https://github.com/user-attachments/assets/630a62d4-3ce5-408d-9bf4-86d258049278" />
 ---
 
 ## 🛠️ Installation & Usage
 
-1.  **Download**: Grab the `Latest.ps1` and the `Launcher.bat` files.
+1.  **Download**: Grab the `Latest.ps1` and the `Launcher.bat` files and place into a folder.  Or, simply dowload the .zip and extract.
 2.  **Inspect**: I encourage you to open the files in Notepad and inspect the code for yourself before running.
 3.  **Launch**: Run the `Launcher.bat` file (it handles the Administrator permissions required for Robocopy).
 4.  **Configure**:
@@ -36,6 +35,16 @@ Through a collaboration between AI contributors and myself over several weeks, t
 5.  **Execute**: Select your OS Generation or Sync method.
 
 ---
+## 📸 Interface Preview
+<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/fae39a54-e0c4-45ce-b638-cbd39dd5849c" />
+
+## 🖥️ System Screenshots
+<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/9df54f7d-05cc-4fb5-afb1-76c7388fe5eb" />
+<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/830e82ed-fc34-4337-8c78-e0b8470ae50e" />
+
+## 🖼️ Dashboard in Action
+<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/da9caa9a-88b4-460b-aa6a-2990653d1c2c" />
+
 
 ## 📚 Credits & Sources
 This tool relies on the hard work of the handheld community:
