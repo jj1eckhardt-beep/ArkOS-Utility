@@ -39,12 +39,12 @@ Through a collaboration between AI contributors and myself over several weeks, t
 <img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/fae39a54-e0c4-45ce-b638-cbd39dd5849c" />
 
 ## 🖥️ System Screenshots
-<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/9df54f7d-05cc-4fb5-afb1-76c7388fe5eb" />
-<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/830e82ed-fc34-4337-8c78-e0b8470ae50e" />
+<img width="1266" height="1478" alt="image" src="https://github.com/user-attachments/assets/7f5a352f-757f-47c3-90b7-d14632a75f39" />
+<img width="1164" height="544" alt="image" src="https://github.com/user-attachments/assets/191204c7-8010-449c-8021-e0a6570dfd6f" />
+
 
 ## 🖼️ Dashboard in Action
-<img width="1678" height="1249" alt="image" src="https://github.com/user-attachments/assets/da9caa9a-88b4-460b-aa6a-2990653d1c2c" />
-
+<img width="1274" height="1486" alt="image" src="https://github.com/user-attachments/assets/76978382-993e-46db-aa49-7630bcb4d668" />
 
 ## 📚 Credits & Sources
 This tool relies on the hard work of the handheld community:
