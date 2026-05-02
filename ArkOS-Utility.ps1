@@ -10,13 +10,13 @@
 # ==============================================================================
 # 1. Manual Identity (Change these for new releases)
 $global:ScriptTitle = "ARKOS UTILITY"  # What people see in the UI
-$global:ScriptVersion = "v1.2.0"             # The version number
-$global:BuildDate = "2026.04.25"         # The build timestamp
+$global:Svers = "v1.2.1"               # The version number
+$global:BuildDate = "2026.05.02"       # The build timestamp
 #$global:RepoName       = "ArkOS-Utility"      # For GitHub link consistency
 
 # 2. Automated File Identity
 # This gets the name of the .ps1 file itself for logging purposes
-$global:FName = (Get-Item $PSCommandPath).Basename 
+$global:ScriptFname1 = (Get-Item $PSCommandPath).Basename 
 
 # 3. Initialize Process Globals
 $global:MasterPath = ""
@@ -33,9 +33,9 @@ $HeaderArt = @"
 	 /...................................\
 	 |:                                 :|           Thank you to the ArkOS Wiki Page.
 	 |:                                 :|           Thank you to the Handheld community.
-	 |:          $FName          :|           
-	 |:          $ScriptVersion                 :|
-	 |:          $BuildDate             :|           
+	 |:          $ScriptFname1          :|           
+	 |:             $Svers              :|
+	 |:           $BuildDate            :|           
 	 |:                                 :|           I Thank God for this day
 	 |:                                 :|           for the sun in the sky
 	 |:                                 :|           for my mom and my dad
@@ -257,7 +257,7 @@ $global:Form.MaximizeBox = $false
 $global:Form.SizeGripStyle = [System.Windows.Forms.SizeGripStyle]::Hide
 
 # --- 2.1.1: HEADER & TITLE ---
-$global:Form.Text = "$global:ScriptTitle | $global:ScriptVersion | Build: $global:BuildDate"
+$global:Form.Text = "$global:ScriptTitle | $global:Svers | Build: $global:BuildDate"
 
 # --- 2.2: GLOBAL UI SCALING & THEME SETTINGS ---
 # Set the icon (if you have one) or generic window properties here
@@ -470,7 +470,7 @@ $global:btnAudit.Enabled = $false # Keep disabled until paths are set
 
 $global:lblGitHub = New-Object System.Windows.Forms.LinkLabel
 # Use single quotes around the whole string so the double quotes stay as text
-$global:lblGitHub.Text = "$global:FName $global:ScriptVersion | GitHub.com | Click for Updates"
+$global:lblGitHub.Text = "$global:ScriptFname1 $global:Svers | GitHub.com | Click for Updates"
 $global:lblGitHub.Location = New-Object System.Drawing.Point(30, 890)
 $global:lblGitHub.Size = New-Object System.Drawing.Size(400, 20)
 $global:lblGitHub.LinkColor = [System.Drawing.Color]::Gray
@@ -480,15 +480,33 @@ $global:lblGitHub.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.D
 $global:lblGitHub.LinkArea = New-Object System.Windows.Forms.LinkArea(0, $global:lblGitHub.Text.Length)
 
 # Section: Footer Support (Standardized for all projects)
+# 1. The Static Text (Gray)
+$global:lblSupportText = New-Object System.Windows.Forms.Label
+$global:lblSupportText.Text = "Support"
+$global:lblSupportText.Location = New-Object Drawing.Point(722, 890) # Matches GitHub Y-axis
+$global:lblSupportText.AutoSize = $true
+$global:lblSupportText.ForeColor = [System.Drawing.Color]::Gray
+$global:lblSupportText.Font = New-Object Drawing.Font("Segoe UI Symbol", 9, [System.Drawing.FontStyle]::Italic)
+# 2. The Heart (Red)
 $global:lblSupport = New-Object System.Windows.Forms.LinkLabel
-$global:lblSupport.Text = "Support $([char]0x2764)" # Heart Unicode (U+2764)
-$global:lblSupport.Location = New-Object System.Drawing.Point(720, 890)
+$global:lblSupport.Text = "$([char]0x2764)" # Heart Unicode (U+2764)
+$global:lblSupport.Location = New-Object System.Drawing.Point(772, 890)
 $global:lblSupport.AutoSize = $true
 $global:lblSupport.LinkColor = [System.Drawing.Color]::Red
-$global:lblSupport.Font = New-Object System.Drawing.Font("Segoe UI Symbol", 9, [System.Drawing.FontStyle]::Bold)
+$global:lblSupport.Font = New-Object System.Drawing.Font("Segoe UI Symbol", 10, [System.Drawing.FontStyle]::Bold)
+$global:lblSupport.LinkBehavior = [System.Windows.Forms.LinkBehavior]::NeverUnderline
 $global:lblSupport.Add_LinkClicked({ Start-Process "https://ko-fi.com/kofisupporter19535" })
+# 1. Create the ToolTip object
+$global:toolTipSupport = New-Object System.Windows.Forms.ToolTip
+$global:toolTipSupport.InitialDelay = 500  # Delay in milliseconds before showing
+$global:toolTipSupport.AutoPopDelay = 5000 # How long it stays visible
+$global:toolTipSupport.ToolTipTitle = "Support the Project"
 
-# THE SECRET SAUCE: Ensure it's at the VERY FRONT of the layering
+# 2. Attach it to your Heart label
+$global:toolTipSupport.SetToolTip($global:lblSupport, "Click here to support via Ko-fi!")
+
+
+# 3. Ensure it's at the VERY FRONT of the layering
 $global:lblSupport.BringToFront() 
 
 
@@ -726,13 +744,13 @@ function Invoke-FullAudit {
     # 1. Audit Master FIRST (Top of Log)
     if ($global:SourcePath) {
         $global:lblAction.Text = "Auditing Master..."
-        Run-Audit $global:SourcePath "Master_Audit.txt"
+        Invoke-Audit $global:SourcePath "Master_Audit.txt"
     }
 
     # 2. Audit Target LAST (Bottom of Log / Screen)
     if ($global:DestPath) {
         $global:lblAction.Text = "Auditing Target..."
-        Run-Audit $global:DestPath "Target.txt"
+        Invoke-Audit $global:DestPath "Target.txt"
     }
     
     $global:lblAction.Text = "Audit Complete."
@@ -934,7 +952,7 @@ function Start-FileTransfer {
     else {
         Update-Log "SUCCESS: $count files processed." $true
         $global:lblAction.Text = "Operation Complete."
-        Run-Audit $global:DestPath "Target_Audit.txt"
+        Invoke-Audit $global:DestPath "Target_Audit.txt"
     }
 }
 
@@ -983,7 +1001,7 @@ function Invoke-PowerClone {
         Update-Log "CLONE COMPLETE: $folderCount System Folders verified/created." $true
         $global:ProgressBar.Value = 100
         $global:ProgressBar.Visible = $false
-        Run-Audit $global:DestPath "Target_Audit.txt"
+        Invoke-Audit $global:DestPath "Target_Audit.txt"
         return
     }
 
@@ -1127,7 +1145,7 @@ function Invoke-Cleanup {
         $global:lblAction.ForeColor = [System.Drawing.Color]::Black # Reset to normal
         
         # Only refresh the Audit if it actually finished
-        Run-Audit $global:DestPath "Target_Audit.txt"
+        Invoke-Audit $global:DestPath "Target_Audit.txt"
     }
 
     $global:Log.AppendText(("!" * $w) + "`r`n")
@@ -1386,12 +1404,12 @@ $global:btnReset.Add_Click({
 
 # --- 5.4: GITHUB DYNAMIC LINK (Cleaned) ---
 $global:lblGitHub.add_LinkClicked({
-    # We use the Global RepoName we defined in Section 0
-    $url = "https://github.com/jj1eckhardt-beep/ArkOS-Utility/tree/main"
+        # We use the Global RepoName we defined in Section 0
+        $url = "https://github.com/jj1eckhardt-beep/ArkOS-Utility/tree/main"
     
-    # Start the browser
-    Start-Process $url
-})
+        # Start the browser
+        Start-Process $url
+    })
 
 
 # --- 5.5: THE NEW HELP SYSTEM ---
@@ -1429,6 +1447,7 @@ $global:Form.Controls.AddRange(@(
         $global:ProgressBar, 
         $global:Log, 
         $global:lblGitHub,
+        $global:lblSupportText,
         $global:lblSupport
     ))
 
