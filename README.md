@@ -43,7 +43,7 @@ Through a collaboration between AI contributors and myself over several weeks, t
 Run Full System Audit
 <img width="1270" height="1483" alt="image" src="https://github.com/user-attachments/assets/1ac0a507-9dec-4542-a6cf-4e2cc9de03d1" />
 
-.txt file output format
+.txt file output format saved to Master and Target folders.
 <img width="1183" height="842" alt="image" src="https://github.com/user-attachments/assets/ec790f66-8485-46c0-97a0-dcda436b6b6e" />
 
 ## 🖼️ Dashboard in Action
