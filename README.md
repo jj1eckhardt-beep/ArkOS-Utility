@@ -71,5 +71,4 @@ If you enjoy testing and debugging software, your time spent identifying issues 
 If "The Vortex" saved you some time or made your handheld setup easier, feel free to help keep the gears turning!
 
 * [**Support via Ko-fi**](https://ko-fi.com/kofisupporter19535)
-* [**Support via Buy Me a Coffee**](https://www.buymeacoffee.com/jj1eckhardt)
 
