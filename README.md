@@ -19,6 +19,7 @@ Through a collaboration between AI contributors and myself over several weeks, t
     *   **Excel-Ready**: Generates 100-character wide, pipe-separated reports (`sep=|`) for easy inventory and Excel import.
 *   **G350 Source (Set as MASTER)**: Automatically filters 170+ "junk" folders from stock G350 cards and safely appends them to a clean ArkOS structure.
 *   **Universal Sync**: A "Safe" copy engine that only moves missing or newer files.
+*   **Cleanup**: Choices are: Mirror the source, or Find and Remove all empty folders and subdirectories.
 *   **Power Clone**: A "Brute Force" mirror that selectively makes the Target a conditional copy of the Master.
 *   **Abort Kill-Switch**: Instantly Halts/Pauses the active Robocopy processes if you need to stop an operation.  You can then quit or resume.
 *   **Audit**: Initiates a system audit that inventories and reports totals in the main log window and creates .txt files on Master and Target.
