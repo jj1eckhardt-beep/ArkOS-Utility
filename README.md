@@ -2,7 +2,7 @@
 ### *"High-Speed Handheld Migration Engine*
 
 ## 📖 The Story
-I am a builder, tinkerer, technician, and SBC enthusiast. My journey into "The Vortex" of retro handhelds began when my kids brought home a **BatleXP G350**. I was impressed.  I quickly added an **R36S** (The Raspberry Pi of handhelds) to my collection and started the cycle of flashing OS images and testing different builds.
+I am a technician, builder, tinkerer, and SBC enthusiast. My journey into "The Vortex" of retro handhelds began when my kids brought home a **BatleXP G350**. I was impressed.  I quickly added an **R36S** (The Raspberry Pi of handhelds) to my collection and started the cycle of flashing OS images and testing different builds.
 
 I soon realized that after every fresh flash, the task of copying a massive library of games back to the SD card was tedious and time-consuming. I asked a simple question: *"You know what would be nice? A script that automated this process from a master library..."*
 
@@ -37,17 +37,20 @@ Through a collaboration between AI contributors and myself over several weeks, t
 
 ---
 ## 📸 Interface Preview
-<img width="2000" height="1500" alt="image" src="https://github.com/user-attachments/assets/b48e0518-ae9f-4023-ab9f-64477a851dff" />
+Quick Help Guide
+<img width="1291" height="954" alt="image" src="https://github.com/user-attachments/assets/f82f52eb-60bf-4e3d-9814-9e314c507528" />
+Paths Set
+<img width="818" height="952" alt="image" src="https://github.com/user-attachments/assets/a99e70cd-3ac4-4ead-973b-419b4cbf4165" />
 
 ## 🖥️ System Screenshots
 Run Full System Audit
-<img width="1270" height="1483" alt="image" src="https://github.com/user-attachments/assets/1ac0a507-9dec-4542-a6cf-4e2cc9de03d1" />
+<img width="814" height="952" alt="image" src="https://github.com/user-attachments/assets/6ba2dddd-0929-499b-bd57-79f904635507" />
 
 .txt file output format saved to Master and Target folders.
-<img width="1183" height="842" alt="image" src="https://github.com/user-attachments/assets/ec790f66-8485-46c0-97a0-dcda436b6b6e" />
+<img width="729" height="493" alt="image" src="https://github.com/user-attachments/assets/6b30b014-4ae4-4b36-8caa-9554b858352e" />
 
 ## 🖼️ Dashboard in Action
-<img width="1248" height="1464" alt="image" src="https://github.com/user-attachments/assets/36128580-8b05-4e09-bc5b-a7d93cf2895c" />
+<img width="813" height="958" alt="image" src="https://github.com/user-attachments/assets/440dd738-f82e-4e98-a1c6-fa59f7644a3f" />
 
 ## 📚 Credits & Sources
 This tool relies on the hard work of the handheld community:
@@ -60,7 +63,7 @@ This tool relies on the hard work of the handheld community:
 ## ⚖️ License & Disclaimer
 This project is licensed under the **MIT License**.
 
-**CAUTION**: This software is in **BETA**. It performs file operations that can be destructive (specifically Power Clone). **Always backup your ROMs.** The author is not responsible for data loss or hardware issues.
+**CAUTION**: This software is in **Development**. It performs file operations that can be destructive (specifically Power Clone). **Always backup your ROMs.** The author is not responsible for data loss or hardware issues.
 
 
 
@@ -68,7 +71,7 @@ This project is licensed under the **MIT License**.
 
 If you enjoy testing and debugging software, your time spent identifying issues and providing feedback and fixes is most valued.
 
-If "The Vortex" saved you some time or made your handheld setup easier, feel free to help keep the gears turning!
+If "The ArkOS-Utility saved you some time or made your handheld setup easier, feel free to help keep the gears turning!
 
 * [**Support via Ko-fi**](https://ko-fi.com/kofisupporter19535)
 
