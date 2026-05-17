@@ -10,12 +10,13 @@
 # ==============================================================================
 # 1. Manual Identity (Change these for new releases)
 $global:ScriptTitle = "ARKOS UTILITY"  # What people see in the UI
-$global:Svers = "v1.2.1"               # The version number
-$global:BuildDate = "2026.05.02"       # The build timestamp
-#$global:RepoName       = "ArkOS-Utility"      # For GitHub link consistency
+$global:Cvers = "v1.2.5"               # The version number
+$global:BuildDate = "2026.05.17"       # The build timestamp
+$global:RepoName = "ArkOS-Utility"     # For GitHub link consistency
+$global:RepoOwner = "jj1eckhardt-beep"
 
 # 2. Automated File Identity
-# This gets the name of the .ps1 file itself for logging purposes
+# This gets the name of the .ps1 file itself for logging purposes -.ps1
 $global:ScriptFname1 = (Get-Item $PSCommandPath).Basename 
 
 # 3. Initialize Process Globals
@@ -34,7 +35,7 @@ $HeaderArt = @"
 	 |:                                 :|           Thank you to the ArkOS Wiki Page.
 	 |:                                 :|           Thank you to the Handheld community.
 	 |:          $ScriptFname1          :|           
-	 |:             $Svers              :|
+	 |:             $Cvers              :|
 	 |:           $BuildDate            :|           
 	 |:                                 :|           I Thank God for this day
 	 |:                                 :|           for the sun in the sky
@@ -50,9 +51,9 @@ $HeaderArt = @"
 	 | |          |        ( Y )   ( A ) |
  	 | |___    ___|                      |
 	 |     |  |       fun      ( B )     |
-	 |     |__|      ( M )               |
+	 |     |__|      ( F )               |
 	 |            ( S ) ( S )            |
-	 |     ___   select start    ___     |
+	 |     ___   select  start   ___     |
 	 |    /   \                 /   \    |
 	 |   {     }               {     }   |
 	 |    \___/                 \___/    |
@@ -257,7 +258,7 @@ $global:Form.MaximizeBox = $false
 $global:Form.SizeGripStyle = [System.Windows.Forms.SizeGripStyle]::Hide
 
 # --- 2.1.1: HEADER & TITLE ---
-$global:Form.Text = "$global:ScriptTitle | $global:Svers | Build: $global:BuildDate"
+$global:Form.Text = "$global:ScriptTitle | $global:Cvers | Build: $global:BuildDate"
 
 # --- 2.2: GLOBAL UI SCALING & THEME SETTINGS ---
 # Set the icon (if you have one) or generic window properties here
@@ -265,10 +266,11 @@ $global:Form.Text = "$global:ScriptTitle | $global:Svers | Build: $global:BuildD
 
 # --- 2.3: SYSTEM COLORS & BRUSHES ---
 # Defining shared colors here makes it easier to change the look later
-$global:ColorDarkPanel = [System.Drawing.ColorTranslator]::FromHtml("#2d2d2d")
+$global:ColorDarkPanel = [System.Drawing.ColorTranslator]::FromHtml("#1e1e1e") #Formerly #2d2d2d, Try #212121, or #1a1a1a
 $global:ColorButtonGray = [System.Drawing.ColorTranslator]::FromHtml("#dcdcdc")
 $global:ColorSyncBlue = [System.Drawing.ColorTranslator]::FromHtml("#add8e6")
 $global:ColorAbortRed = [System.Drawing.ColorTranslator]::FromHtml("#FF0000")
+$global:ColorGboxLine = [System.Drawing.ColorTranslator]::FromHtml("#2d2d2d")
 
 # ==============================================================================
 # SECTION 3: UI CONTROLS (Labels, Buttons, & Logs)
@@ -334,11 +336,34 @@ $global:btnAbort.Font = New-Object Drawing.Font("Segoe UI", 10, [Drawing.FontSty
 $global:btnAbort.Enabled = $false
 
 $global:btnCleanup = New-Object Windows.Forms.Button
-$global:btnCleanup.Text = "CLEANUP (Mirror Mode)"
-$global:btnCleanup.Location = New-Object System.Drawing.Point(405, 185)
-$global:btnCleanup.Size = New-Object System.Drawing.Size(365, 55)
+$global:btnCleanup.Text = "CLEANUP"
+$global:btnCleanup.Location = New-Object System.Drawing.Point(402, 185)
+$global:btnCleanup.Size = New-Object System.Drawing.Size(180, 55)
 $global:btnCleanup.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#ffb6c1")
 $global:btnCleanup.Enabled = $false
+
+# Cleanup Mode GroupBox
+$global:gbCleanMode = New-Object Windows.Forms.GroupBox
+$global:gbCleanMode.Text = "Cleanup Mode"
+$global:gbCleanMode.Location = New-Object System.Drawing.Point(592, 182) #
+$global:gbCleanMode.Size = New-Object System.Drawing.Size(175, 57)  # 
+$global:gbCleanMode.Forecolor = [System.Drawing.Color]::Black
+
+$global:rbMirrSource = New-Object Windows.Forms.RadioButton
+$global:rbMirrSource.Text = "Mirror Source"
+$global:rbMirrSource.Location = New-Object System.Drawing.Point(10, 14)
+$global:rbMirrSource.ForeColor = [System.Drawing.Color]::Black
+$global:rbMirrSource.AutoSize = $true 
+$global:rbMirrSource.Checked = $true
+
+$global:rbDeleteEmpty = New-Object Windows.Forms.RadioButton
+$global:rbDeleteEmpty.Text = "Delete Empty"
+$global:rbDeleteEmpty.Location = New-Object System.Drawing.Point(10, 33)
+$global:rbDeleteEmpty.ForeColor = [System.Drawing.Color]::Black
+$global:rbDeleteEmpty.AutoSize = $true
+
+$global:gbCleanMode.Controls.AddRange(@($global:rbMirrsource, $global:rbDeleteEmpty))
+
 
 # --- 3.4: OS GENERATION & TOOLS ---
 $global:btnGenArk = New-Object Windows.Forms.Button
@@ -389,13 +414,13 @@ $global:rbEverything.Location = New-Object System.Drawing.Point(10, 31)
 # Right Side Column (Inline with Folders)
 $global:rbSystemOnly = New-Object Windows.Forms.RadioButton
 $global:rbSystemOnly.Text = "System Only (BIOS/Ports/Tools)"
-$global:rbSystemOnly.Location = New-Object System.Drawing.Point(150, 12) # Moved to the right
+$global:rbSystemOnly.Location = New-Object System.Drawing.Point(150, 14) # Moved to the right
 $global:rbSystemOnly.AutoSize = $true
 
 # NEW: ROMs Only Radio Button (Placed directly under System Only)
 $global:rbRomsOnly = New-Object Windows.Forms.RadioButton
 $global:rbRomsOnly.Text = "ROMs Only (No System Folders)"
-$global:rbRomsOnly.Location = New-Object System.Drawing.Point(150, 31) 
+$global:rbRomsOnly.Location = New-Object System.Drawing.Point(150, 33) 
 $global:rbRomsOnly.AutoSize = $true
 
 $global:gbCloneMode.Controls.AddRange(@(
@@ -470,7 +495,7 @@ $global:btnAudit.Enabled = $false # Keep disabled until paths are set
 
 $global:lblGitHub = New-Object System.Windows.Forms.LinkLabel
 # Use single quotes around the whole string so the double quotes stay as text
-$global:lblGitHub.Text = "$global:ScriptFname1 $global:Svers | GitHub.com | Click for Updates"
+$global:lblGitHub.Text = "$global:ScriptFname1 $global:Cvers | GitHub.com | Click for Updates"
 $global:lblGitHub.Location = New-Object System.Drawing.Point(30, 890)
 $global:lblGitHub.Size = New-Object System.Drawing.Size(400, 20)
 $global:lblGitHub.LinkColor = [System.Drawing.Color]::Gray
@@ -548,14 +573,25 @@ function Set-UIState {
 
 # Function 4.1: Check if Master and Target paths are set
 function Test-PathsReady {
-    param([string]$ActionName)
+    param(
+        [string]$ActionName,
+        [bool]$DestinationOnly = $false
+    )
     
-    if ([string]::IsNullOrWhiteSpace($global:SourcePath) -or [string]::IsNullOrWhiteSpace($global:DestPath)) {
-        $missing = if (!$global:SourcePath) { "MASTER (Source)" } else { "TARGET (SD/PC)" }
-        [System.Windows.Forms.MessageBox]::Show("Please select a $missing folder before running: $ActionName", "Paths Not Set", [System.Windows.Forms.MessageBoxButtons]::OK, 
-            [System.Windows.Forms.MessageBoxIcon]::Warning)
+    # 1. Target is always mandatory
+    if ([string]::IsNullOrWhiteSpace($global:DestPath)) {
+        [System.Windows.Forms.MessageBox]::Show("Please select a TARGET folder before running: $ActionName", "Paths Not Set",
+            [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
+
+    # 2. Master is only mandatory if NOT Destination-Only
+    if (-not $DestinationOnly -and [string]::IsNullOrWhiteSpace($global:SourcePath)) {
+        [System.Windows.Forms.MessageBox]::Show("Please select a MASTER folder before running: $ActionName", "Paths Not Set",
+            [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return $false
+    }
+
     return $true
 }
 
@@ -635,36 +671,42 @@ function Update-Log {
 # Function 4.4: Master/Target Folder Selection
 function Set-Path {
     param([string]$Type)
+    
     $fb = New-Object Windows.Forms.FolderBrowserDialog
-    # --- THE ADDITION: Enable the "Make New Folder" button ---
-    $fb.ShowNewFolderButton = $true 
+    $fb.ShowNewFolderButton = $true
+    
     if ($fb.ShowDialog() -eq [Windows.Forms.DialogResult]::OK) {
         if ($Type -eq "Master") {
             $global:SourcePath = $fb.SelectedPath
             Update-Log "MASTER SET: $global:SourcePath"
+            
+            # WAKE UP BOTH-PATHS BUTTONS (If Target was already selected first)
+            if ($global:DestPath -ne "") {
+                $global:btnSync.Enabled = $true
+                $global:btnPowerClone.Enabled = $true
+                $global:btnGenG350.Enabled = $true # Enforced here!
+            }
         } 
         else {
             $global:DestPath = $fb.SelectedPath
             Update-Log "TARGET SET: $global:DestPath"
             
-            # --- THE FIX: Wake up the buttons ---
-            $global:btnAudit.Enabled = $true  
+            # WAKE UP TARGET-ONLY BUTTONS
+            $global:btnAudit.Enabled = $true
             $global:btnGenArk.Enabled = $true
             $global:btnGenDark.Enabled = $true
             $global:btnGenDarkRE.Enabled = $true
-            $global:btnGenG350.Enabled = $true
             $global:btnCleanup.Enabled = $true
-            # --- THE FIX: Wake up the buttons ---
-            $global:btnAudit.Enabled = $true  # <--- Change from btnRefresh to btnAudit
-            $global:btnAudit.BackColor = [System.Drawing.Color]::LightGreen # Optional: Make it pop!
-
-
-            # Only enable Sync/Clone if BOTH Master AND Target exist
+            $global:btnAudit.BackColor = [System.Drawing.Color]::LightGreen
+            
+            # WAKE UP BOTH-PATHS BUTTONS (If Master was already selected first)
             if ($global:SourcePath -ne "") {
                 $global:btnSync.Enabled = $true
                 $global:btnPowerClone.Enabled = $true
+                $global:btnGenG350.Enabled = $true # Enforced here!
             }
         }
+        
         $global:lblStatus.Text = "MASTER: $($global:SourcePath)`r`nTARGET: $($global:DestPath)"
     }
 }
@@ -750,7 +792,7 @@ function Invoke-FullAudit {
     # 2. Audit Target LAST (Bottom of Log / Screen)
     if ($global:DestPath) {
         $global:lblAction.Text = "Auditing Target..."
-        Invoke-Audit $global:DestPath "Target.txt"
+        Invoke-Audit $global:DestPath "Target_Audit.txt"
     }
     
     $global:lblAction.Text = "Audit Complete."
@@ -776,30 +818,37 @@ function Update-ActionLog {
 # Function 4.6.1: OS-Specific Folder Creation (RE-Aware)
 function Invoke-Generation {
     param([string]$OSTarget)
-    if (-not (Test-PathsReady "Generation ($OSTarget)")) { return }
     
+    # 1. DYNAMIC PATH CHECK: G350 requires BOTH paths, ArkOS variants only require Target!
+    $isDestOnly = ($OSTarget -ne "G350Src")
+    if (-not (Test-PathsReady "Generation ($OSTarget)" $isDestOnly)) { return }
+
     Reset-ActionDisplay
-    $global:Log.AppendText("`r`n" + ("*" * $w) + "`r`n") 
-    Update-Log "GENERATING $OSTarget STRUCTURE..." $true 
-    
+    $global:Log.AppendText("`r`n" + ("*" * $w) + "`r`n")
+    Update-Log "GENERATING $OSTarget STRUCTURE..." $true
     $count = 0
+    
     foreach ($sys in $global:SystemDatabase) {
-        # --- THE UPDATED LOGIC GATE ---
+        # --- RESTORED LOGIC GATE ---
+        # G350 MUST evaluate physical paths on the Master drive to filter correctly!
         if ($OSTarget -eq "G350Src") {
-            $shouldCreate = ($sys.G350_Src -ne "---" -and (Test-Path (Join-Path $global:SourcePath $sys.G350_Src)))
+            $srcFolder = if ($sys.G350_Src -ne "---") { $sys.G350_Src } else { $sys.Folder }
+            $shouldCreate = ($sys.G350_Src -ne "---" -and (Test-Path (Join-Path $global:SourcePath $srcFolder)))
         }
         elseif ($OSTarget -match "RE") {
-            $shouldCreate = ($sys.dArkOS -eq $true) 
+            $shouldCreate = ($sys.dArkOS -eq $true)
         }
         else {
             $shouldCreate = ($sys.$OSTarget -eq $true)
         }
 
         if ($shouldCreate) {
-            $targetPath = Join-Path $global:DestPath $sys.Folder
-            
+            # Determine the exact name the target folder should have
+            $folderName = if ($OSTarget -eq "G350Src") { $sys.G350_Src } else { $sys.Folder }
+            $targetPath = Join-Path $global:DestPath $folderName
+
             # --- THE SAFETY GATE: Check for Subfolders ---
-            if ($sys.Folder -match '[\\/]') {
+            if ($folderName -match '[\\/]') {
                 $parentDir = Split-Path $targetPath -Parent
                 if (!(Test-Path $parentDir) -and (Split-Path $parentDir -Leaf)) {
                     New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
@@ -816,16 +865,14 @@ function Invoke-Generation {
             }
             [System.Windows.Forms.Application]::DoEvents()
         }
-    } # <--- BRACKET 1: Closes the "foreach" loop
+    }
 
     # --- UI SANITIZATION ---
-    $global:ProgressBar.Value = 100
-    # Small pause so the user actually sees it hit 100% before it vanishes
-    [System.Windows.Forms.Application]::DoEvents() 
+    $global:ProgressBar.Value = 100 
+    [System.Windows.Forms.Application]::DoEvents()
     $global:ProgressBar.Visible = $false
-    
     Update-Log "GEN COMPLETE: $count clean folders prepared for migration." $true
-} # <--- BRACKET 2: Closes the "function"
+}
 
 # Function 4.7: Centralized File Transfer Logic (v1.1.0 - Timer Optimized)
 function Start-FileTransfer {
@@ -1069,63 +1116,105 @@ function Invoke-PowerClone {
 
 # Function 4.9: Advanced Mirror/Cleanup Logic
 function Invoke-Cleanup {
-    if (-not (Test-PathsReady "Cleanup (Mirror Mode)")) { return }
+    # Dynamically pass $true if Delete Empty is checked, telling the checker to ignore Master
+    if (-not (Test-PathsReady "Cleanup Mode" $global:rbDeleteEmpty.Checked)) { return }
 
-    # 1. Safety Confirmation
-    $msg = "MIRROR MODE: This will PERMANENTLY DELETE files and FOLDERS on the TARGET (SD) that do not exist on the MASTER (PC).`n`nProceed?"
-    if ([System.Windows.Forms.MessageBox]::Show($msg, "Critical Warning", [System.Windows.Forms.MessageBoxButtons]::YesNo, 
-            [System.Windows.Forms.MessageBoxIcon]::Warning) -ne [System.Windows.Forms.DialogResult]::Yes) { return }
-  
-    # --- Add this to the top of your functions in Section 4 ---
-    $global:AbortSync = $false              # Reset the abort trigger
-    $global:lblAction.ForeColor = [System.Drawing.Color]::Black # Reset text color
-    # 2. Reset UI for Action
-    $global:btnAbort.Enabled = $true
-    $global:Log.AppendText("`r`n" + ("!" * $w) + "`r`n") 
-    Update-Log "STARTING CLEANUP (MIRROR MODE)..." $true
-
-    # --- NEW STEP: THE GHOST PURGE ---
-    # Find folders on Target that aren't on Master
-    $masterFolderNames = Get-ChildItem $global:SourcePath -Directory | Select-Object -ExpandProperty Name
-    $targetFolders = Get-ChildItem $global:DestPath -Directory
-    
-    foreach ($tFolder in $targetFolders) {
-        if ($masterFolderNames -notcontains $tFolder.Name) {
-            Update-Log "PURGING GHOST FOLDER: $($tFolder.Name)"
-            Remove-Item $tFolder.FullName -Recurse -Force -ErrorAction SilentlyContinue
-        }
+    # --- 1. Safety Confirmation Based on Selection ---
+    if ($global:rbMirrSource.Checked) {
+        $msg = "MIRROR MODE: This will PERMANENTLY DELETE files and FOLDERS on the TARGET (SD) that do not exist on the MASTER (PC).`n`nProceed?"
+    }
+    else {
+        $msg = "DELETE EMPTY FOLDERS: This will scan the TARGET (SD) and permanently remove all empty directories.`n`nProceed?"
     }
 
-    # 3. Execution (Folder by Folder Mirroring)
-    $masterDirs = Get-ChildItem $global:SourcePath -Directory
-    $total = $masterDirs.Count; $current = 0
+    if ([System.Windows.Forms.MessageBox]::Show($msg, "Critical Warning", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning) -ne [System.Windows.Forms.DialogResult]::Yes) { 
+        return 
+    }
 
-    foreach ($dir in $masterDirs) {
-        # Check for Abort BEFORE starting the next folder
-        if ($global:AbortSync) { 
-            Update-Log "CLEANUP HALTED BY USER." $true
-            break 
-        }
+    # Reset the abort trigger & text color
+    $global:AbortSync = $false 
+    $global:lblAction.ForeColor = [System.Drawing.Color]::Black 
+
+    # 2. Reset UI for Action
+    $global:btnAbort.Enabled = $true
+    $global:Log.AppendText("`r`n" + ("!" * $w) + "`r`n")
     
-        $targetPath = Join-Path $global:DestPath $dir.Name
-        if (Test-Path $targetPath) {
-            Update-Log "Mirroring: $($dir.Name)..."
+    # ----------------------------------------------------
+    # MODE 1: DELETE EMPTY FOLDERS LOGIC
+    # ----------------------------------------------------
+    if ($global:rbDeleteEmpty.Checked) {
+        Update-Log "STARTING PURGE OF EMPTY FOLDERS..." $true
         
-            # We run Robocopy. If Abort is clicked, the Stop-Process above kills it.
-            robocopy $dir.FullName $targetPath /MIR /R:1 /W:1 /NP /NFL /NDL /NJH /NJS /MT:8 | Out-Null
+        # Get all subdirectories sorted by depth (deepest first so nested empty folders delete correctly)
+        $targetDirs = Get-ChildItem $global:DestPath -Recurse -Directory | 
+        Sort-Object { $_.FullName.Length } -Descending
+
+        $total = $targetDirs.Count
+        $current = 0
+
+        foreach ($dir in $targetDirs) {
+            if ($global:AbortSync) {
+                Update-Log "CLEANUP HALTED BY USER." $true
+                break
+            }
+
+            # Check if the directory contains any files or folders
+            if ((Get-ChildItem $dir.FullName -Force).Count -eq 0) {
+                Update-Log "REMOVING EMPTY FOLDER: $($dir.Name)"
+                Remove-Item $dir.FullName -Force -ErrorAction SilentlyContinue
+            }
+
+            # UI Keep-Alive and Progress
+            [System.Windows.Forms.Application]::DoEvents()
+            $current++
+            if ($total -gt 0) {
+                $percent = [int](($current / $total) * 100)
+                $global:ProgressBar.Value = $percent
+                $global:ProgressBar.Visible = $true
+            }
+            [System.Windows.Forms.Application]::DoEvents()
+        }
+    }
+    # ----------------------------------------------------
+    # MODE 2: ORIGINAL MIRROR LOGIC
+    # ----------------------------------------------------
+    else {
+        Update-Log "STARTING CLEANUP (MIRROR MODE)..." $true
+
+        # --- THE GHOST PURGE ---
+        $masterFolderNames = Get-ChildItem $global:SourcePath -Directory | Select-Object -ExpandProperty Name
+        $targetFolders = Get-ChildItem $global:DestPath -Directory
+        foreach ($tFolder in $targetFolders) {
+            if ($masterFolderNames -notcontains $tFolder.Name) {
+                Update-Log "PURGING GHOST FOLDER: $($tFolder.Name)"
+                Remove-Item $tFolder.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
-        # This line is CRITICAL - it allows the UI to "hear" the Abort button click
-        [System.Windows.Forms.Application]::DoEvents()
+        # Execution (Folder by Folder Mirroring)
+        $masterDirs = Get-ChildItem $global:SourcePath -Directory
+        $total = $masterDirs.Count
+        $current = 0
 
-        # Progress Update...
-        $current++
-        # ... rest of your progress bar code ...
+        foreach ($dir in $masterDirs) {
+            if ($global:AbortSync) {
+                Update-Log "CLEANUP HALTED BY USER." $true
+                break
+            }
 
-        $percent = [int](($current / $total) * 100)
-        $global:ProgressBar.Value = $percent
-        $global:ProgressBar.Visible = $true
-        [System.Windows.Forms.Application]::DoEvents()
+            $targetPath = Join-Path $global:DestPath $dir.Name
+            if (Test-Path $targetPath) {
+                Update-Log "Mirroring: $($dir.Name)..."
+                robocopy $dir.FullName $targetPath /MIR /R:1 /W:1 /NP /NFL /NDL /NJH /NJS /MT:8 | Out-Null
+            }
+
+            [System.Windows.Forms.Application]::DoEvents()
+            $current++
+            $percent = [int](($current / $total) * 100)
+            $global:ProgressBar.Value = $percent
+            $global:ProgressBar.Visible = $true
+            [System.Windows.Forms.Application]::DoEvents()
+        }
     }
 
     # 4. Finalize
@@ -1133,52 +1222,62 @@ function Invoke-Cleanup {
     $global:btnAbort.Enabled = $false
 
     if ($global:AbortSync) {
-        # --- THE ABORT MESSAGE ---
         Update-Log "!!! CLEANUP ABORTED BY USER !!!" $true
         $global:lblAction.Text = "ABORTED: Process Halted."
         $global:lblAction.ForeColor = [System.Drawing.Color]::Red
-    } 
-    else {
-        # --- THE SUCCESS MESSAGE ---
-        Update-Log "CLEANUP FINISHED. Target is now a perfect 1:1 mirror." $true
-        $global:lblAction.Text = "Clean Complete."
-        $global:lblAction.ForeColor = [System.Drawing.Color]::Black # Reset to normal
-        
-        # Only refresh the Audit if it actually finished
-        Invoke-Audit $global:DestPath "Target_Audit.txt"
     }
-
+    else {
+        # Check what finished to give the correct log/label message
+        if ($global:rbDeleteEmpty.Checked) {
+            Update-Log "CLEANUP FINISHED. All empty folders removed." $true
+            $global:lblAction.Text = "Purge Complete."
+        }
+        else {
+            Update-Log "CLEANUP FINISHED. Target is now a perfect 1:1 mirror." $true
+            $global:lblAction.Text = "Clean Complete."
+        }
+        $global:lblAction.ForeColor = [System.Drawing.Color]::Black 
+        Invoke-Audit $global:DestPath "Target_Audit.txt" 
+    }
+    
     $global:Log.AppendText(("!" * $w) + "`r`n")
 }
 
 # --- Function 4.10: G350 to ArkOS Smart Migration ---
 function Invoke-G350Src {
-    if (-not (Test-PathsReady "G350 Migration")) { return }
-    Reset-ActionDisplay
+    # 1. PATH ENFORCEMENT: Enforce both Master and Target paths ($false = not destination-only)
+    if (-not (Test-PathsReady "G350 Migration" $false)) { return }
     
+    Reset-ActionDisplay
     Update-Log "G350 SMART MIGRATION: Building File List..." $true
     
-    # 1. Build the "Smart List" (Only things in our 130-system DB)
+    # 2. Build the "Smart List" (Filters based on your 130-system DB)
     $migrationList = @()
     foreach ($sys in $global:SystemDatabase) {
-        # Check G350_Src first, fallback to Folder
+        # Check G350_Src folder name; fall back to primary folder name if blank
         $srcName = if ($sys.G350_Src -ne "---") { $sys.G350_Src } else { $sys.Folder }
         $srcFull = Join-Path $global:SourcePath $srcName
         
-        if (Test-Path $srcFull) {
-            # Get all ROM files in this specific G350 folder
-            $files = Get-ChildItem $srcFull -File -Recurse
-            $migrationList += $files.FullName
+        if (Test-Path $srcFull -ErrorAction SilentlyContinue) {
+            # Recursively collect all existing ROM files inside this valid system folder
+            $files = Get-ChildItem $srcFull -File -Recurse -ErrorAction SilentlyContinue
+            if ($files) {
+                $migrationList += $files.FullName
+            }
         }
     }
-
-    # 2. Hand off the list to your Universal Sync engine
+    
+    # 3. Execution Hand-Off
     if ($migrationList.Count -gt 0) {
-        # This calls your working, safe, abortable transfer logic
+        # Sends your filtered file array straight to your robust universal transfer UI
         Start-FileTransfer -FileList $migrationList -Title "G350 TO ARKOS MIGRATION"
-    }
-    else {
-        [System.Windows.Forms.MessageBox]::Show("No matching G350 folders found in Master path.")
+    } else {
+        [System.Windows.Forms.MessageBox]::Show(
+            "No matching G350 folders containing ROM files were found inside the selected Master path.", 
+            "Migration Empty", 
+            [System.Windows.Forms.MessageBoxButtons]::OK, 
+            [System.Windows.Forms.MessageBoxIcon]::Information
+        ) | Out-Null
     }
 }
 
@@ -1243,20 +1342,22 @@ function Show-HelpManual {
     $global:Log.AppendText("$hr`r`n`r`n")
 
     
-    $global:Log.AppendText(" ***** First select a MASTER and a TARGET folder to activate the functional buttons. *****`r`n`r`n")
+    $global:Log.AppendText("    ***** Select a TARGET, or MASTER and TARGET folders to activate the functional buttons. *****`r`n`r`n")
     $HelpItems = @(
         @{ Cmd = "[ Sel MASTER ]" ; Desc = "Sets the path to your Master PC 'Gold Standard' ROM collection folder." },
-        @{ Cmd = "[ Sel TARGET ]" ; Desc = "Sets the path to your Target SD Card or handheld device folder." },
+        @{ Cmd = "[ Sel TARGET ]" ; Desc = "Sets the path to your Target SD Card, directory, or handheld device folder." },
         @{ Cmd = "[ UNIV SYNC ]"  ; Desc = "SAFE. Copies only missing files from Master to Target based on extension." },
+        @{ Cmd = "[ CLEANUP ]"    ; Desc = "Cleans the TARGET only based on the selected Cleanup Mode.  Master is unchanged." },
+        @{ Cmd = " (Mirr Source)" ; Desc = "Removes ._ files, empty folders, and junk to match the Target to the Master." },
+        @{ Cmd = " (Delete Empty)"; Desc = "Removes all empty folders on the Target, whether they exist on the Master or not." },
         @{ Cmd = "[ PWR CLONE ]"  ; Desc = "BRUTE FORCE. Options: Folders Only, ROMs Only, System Only, or EVERYTHING." },
         @{ Cmd = " (System Only)" ; Desc = "Clones BIOS, Ports, Themes, and Tools folders and sub-folders only." },
-        @{ Cmd = " (ROMs Only)"   ; Desc = "Clones ROMs only for SD2 setups (Skips BIOS, Ports, and Tools)." },
+        @{ Cmd = " (ROMs Only)"   ; Desc = "Clones ROMs only.  Geared for SD2 setups (Skips BIOS, Ports, and Tools)." },
         @{ Cmd = "[ SYS AUDIT ]"  ; Desc = "Generates a pipe-separated report (.txt) for review or spreadsheet import." },
-        @{ Cmd = "[ CLEAN Mirr ]" ; Desc = "Removes ._ files, empty folders, and junk to match Target to Master." },
         @{ Cmd = "[ ABORT ]"      ; Desc = "Halts/pauses the current operation, re-click the operation to resume." },
         @{ Cmd = "[ GEN xxxOS ]"  ; Desc = "Creates the specific folder structure for ArkOS / dArkOS / dArkOS-RE." },
-        @{ Cmd = "[ G350 Src  ]"  ; Desc = "Uses a stock G350 SD as source to append a clean ArkOS structure." },
-        @{ Cmd = "[ G350 Src. ]"  ; Desc = "Creates ONLY the folders containing ROMs on your target device." }
+        @{ Cmd = "[ G350 Src  ]"  ; Desc = "Uses a stock G350 SD card as the source to append a clean ArkOS structure." },
+        @{ Cmd = "[ G350 Src. ]"  ; Desc = "Creates ONLY the folders with ROMs when SYNCHED to an empty target folder." }
     )
 
     foreach ($item in $HelpItems) {
@@ -1266,8 +1367,60 @@ function Show-HelpManual {
     
     $global:Log.AppendText("`r`n$hr`r`n")
     # $global:Log.AppendText(" TIP: Hover over the [?] icons for specific system help.`r`n")
-    $global:Log.AppendText("This tool is still BETA and under development.  Use with CAUTION, at your own risk.`r`n")
-    $global:Log.AppendText("$hr`r`n`r`n")
+    $global:Log.AppendText("       **This tool is continually under development.  Use with CAUTION, at your own risk.**`r`n")
+    $global:Log.AppendText("$hr")
+}
+
+# 4.5 Check4Update Set your current version
+function Test-Update {
+    try {
+        $ping = New-Object System.Net.NetworkInformation.Ping
+        $reply = $ping.Send("1.1.1.1", 1000)
+        if ($reply.Status -ne "Success") { return }
+    } catch { return }
+
+    try {
+        # Programmatic endpoint for your public Git repository tags
+        $apiUrl = "https://github.com"
+        $userAgent = "ArkOS-Utility-Script"
+        
+        # Native connection parameter mapping to prevent 406 rejections
+        $tagsArray = Invoke-RestMethod -Uri $apiUrl -Method Get -UserAgent $userAgent -ContentType "application/json" -ErrorAction Stop 
+        
+        # Abort if the repository returns an empty collection block
+        if ($null -eq $tagsArray -or $tagsArray.Count -eq 0) { return } 
+        
+        # LEGACY FIX: Explicitly target array index [0] to extract data in PS 5.1
+        $rawTagName = $tagsArray[0].name
+        
+        # 1. CLEAN THE STRINGS (Strips out letters or "v" markers)
+        $latestStr = $rawTagName -replace '[^0-9.]', '' 
+        $currentStr = $global:Cvers -replace '[^0-9.]', '' 
+        
+        # 2. SANITY CHECK: Abort if data parsing collapsed
+        if ([string]::IsNullOrWhiteSpace($latestStr) -or [string]::IsNullOrWhiteSpace($currentStr)) { 
+            return 
+        } 
+        
+        # 3. COMPARE VERSION OBJECTS
+        if ([version]$latestStr -gt [version]$currentStr) { 
+            Add-Type -AssemblyName System.Windows.Forms 
+            
+            $downloadUrl = "https://github.com"
+            $msg = "A new version of $($global:ScriptTitle) ($rawTagName) is available!`n`nDownload: $downloadUrl" 
+            
+            [System.Windows.Forms.MessageBox]::Show(
+                $msg, 
+                "Update Available", 
+                [System.Windows.Forms.MessageBoxButtons]::OK, 
+                [System.Windows.Forms.MessageBoxIcon]::Information
+            ) | Out-Null
+        } 
+    } 
+    catch { 
+        # Completely silent error safety shield
+        Write-Debug "Update check failed: $($_.Exception.Message)" 
+    } 
 }
 
 # ==============================================================================
@@ -1360,16 +1513,18 @@ $global:btnGenDarkRE.Add_Click({
     })
 
 $global:btnGenG350.Add_Click({
-        try {
-            Set-UIState -IsWorking $true
-            Start-Sleep -Milliseconds 100
-            Reset-ActionDisplay
-            Invoke-Generation "G350"
-        }
-        finally {
-            Set-UIState -IsWorking $false
-        }
-    })
+    try {
+        Set-UIState -IsWorking $true
+        Start-Sleep -Milliseconds 100
+        Reset-ActionDisplay
+        
+        # FIX: Call the actual smart ROM migration function, not the folder generator!
+        Invoke-G350Src
+    } 
+    finally {
+        Set-UIState -IsWorking $false
+    }
+})
 
 
 # --- 5.4: UTILITY & SAFETY EVENTS ---
@@ -1436,6 +1591,7 @@ $global:Form.Controls.AddRange(@(
         $global:btnSync, 
         $global:btnAbort, 
         $global:btnCleanup,
+        $global:gbCleanMode,
         $global:btnGenArk, 
         $global:btnGenDark, 
         $global:btnGenDarkRE, 
@@ -1449,6 +1605,7 @@ $global:Form.Controls.AddRange(@(
         $global:lblGitHub,
         $global:lblSupportText,
         $global:lblSupport
+        
     ))
 
 # --- 6.2: FINAL UI TWEAKS ---
@@ -1459,6 +1616,10 @@ $global:Log.SelectionStart = 0
 $global:Log.DeselectAll()
 
 # --- 6.3: THE FINAL LAUNCHER ---
+
+# Trigger the update check right before showing the UI
+Test-Update
+
 # This is the very last line of the script. It opens the window and 
 # keeps the script running until you close the X.
 $global:Form.ShowDialog()
@@ -1470,6 +1631,3 @@ $global:Form.add_FormClosing({
         $global:UITimer.Dispose()
     })
 $global:Form.Dispose()
-
-
-
