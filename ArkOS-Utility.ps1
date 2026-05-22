@@ -10,8 +10,8 @@
 # ==============================================================================
 # 1. Manual Identity (Change these for new releases)
 $global:ScriptTitle = "ARKOS UTILITY"  # What people see in the UI
-$global:Cvers = "v1.2.5"               # The version number
-$global:BuildDate = "2026.05.17"       # The build timestamp
+$global:Cvers = "v1.2.6"               # The version number
+$global:BuildDate = "2026.05.21"       # The build timestamp
 $global:RepoName = "ArkOS-Utility"     # For GitHub link consistency
 $global:RepoOwner = "jj1eckhardt-beep"
 
@@ -138,7 +138,7 @@ $global:SystemDatabase = @(
     [PSCustomObject]@{ID = 41.2  ; Name = "Final Burn Neo"          ; Folder = "fbneo"            ; Alias = "---"         ; G350_Src = "fbneo"            ; ArkOS = $false   ; dArkOS = $false   ; RE_ID = "41.2" },   
     [PSCustomObject]@{ID = 42    ; Name = "Famicom Disk System"     ; Folder = "fds"              ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "42" },     
     [PSCustomObject]@{ID = 43    ; Name = "Game and Watch"          ; Folder = "gameandwatch"     ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "43" },     
-    [PSCustomObject]@{ID = 44    ; Name = "Game Gear"               ; Folder = "gamegear"         ; Alias = "gg"          ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "44" },     
+    [PSCustomObject]@{ID = 44    ; Name = "Game Gear (Sega)"        ; Folder = "gamegear"         ; Alias = "gg"          ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "44" },     
     [PSCustomObject]@{ID = 44.1  ; Name = "Game Tank"               ; Folder = "gametank"         ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $false   ; dArkOS = $true    ; RE_ID = "44.1" },   
     [PSCustomObject]@{ID = 45    ; Name = "Nintendo Game Boy"       ; Folder = "gb"               ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "45" },     
     [PSCustomObject]@{ID = 46    ; Name = "Game Boy Advance"        ; Folder = "gba"              ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "46" },     
@@ -344,10 +344,11 @@ $global:btnCleanup.Enabled = $false
 
 # Cleanup Mode GroupBox
 $global:gbCleanMode = New-Object Windows.Forms.GroupBox
-$global:gbCleanMode.Text = "Cleanup Mode"
-$global:gbCleanMode.Location = New-Object System.Drawing.Point(592, 182) #
-$global:gbCleanMode.Size = New-Object System.Drawing.Size(175, 57)  # 
-$global:gbCleanMode.Forecolor = [System.Drawing.Color]::Black
+$global:gbCleanMode.Text = "Cleanup Mode Select"
+$global:gbCleanMode.Location = New-Object System.Drawing.Point(592, 182)
+$global:gbCleanMode.Size = New-Object System.Drawing.Size(175, 57)
+$global:gbCleanMode.ForeColor = [System.Drawing.Color]::Black
+$global:gbCleanMode.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
 
 $global:rbMirrSource = New-Object Windows.Forms.RadioButton
 $global:rbMirrSource.Text = "Mirror Source"
@@ -357,7 +358,7 @@ $global:rbMirrSource.AutoSize = $true
 $global:rbMirrSource.Checked = $true
 
 $global:rbDeleteEmpty = New-Object Windows.Forms.RadioButton
-$global:rbDeleteEmpty.Text = "Delete Empty"
+$global:rbDeleteEmpty.Text = "Delete Empty Folders"
 $global:rbDeleteEmpty.Location = New-Object System.Drawing.Point(10, 33)
 $global:rbDeleteEmpty.ForeColor = [System.Drawing.Color]::Black
 $global:rbDeleteEmpty.AutoSize = $true
@@ -398,8 +399,9 @@ $global:btnGenG350.Enabled = $false
 # --- 3.5: CLONE MODE GROUPBOX (Expanded & Aligned) ---
 $global:gbCloneMode = New-Object Windows.Forms.GroupBox
 $global:gbCloneMode.Text = "Clone Mode Select"
-$global:gbCloneMode.Location = New-Object System.Drawing.Point(405, 322) # Expanded leftward
-$global:gbCloneMode.Size = New-Object System.Drawing.Size(360, 57)  # Much wider, shorter height
+$global:gbCloneMode.Location = New-Object System.Drawing.Point(405, 322)
+$global:gbCloneMode.Size = New-Object System.Drawing.Size(360, 57)
+$global:gbCloneMode.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
 
 # Left Side Column
 $global:rbFoldersOnly = New-Object Windows.Forms.RadioButton
@@ -714,8 +716,7 @@ function Set-Path {
 # Function 4.5: Full System Scan & Report Generation
 function Invoke-Audit {
     param($Path, $FileName)
-    if (-not (Test-Path $Path)) { return }
-
+    if (-not ([System.IO.Directory]::Exists($Path))) { return }
     # --- ONE WIDTH TO RULE THEM ALL ---
     $w = 88
 
@@ -833,7 +834,7 @@ function Invoke-Generation {
         # G350 MUST evaluate physical paths on the Master drive to filter correctly!
         if ($OSTarget -eq "G350Src") {
             $srcFolder = if ($sys.G350_Src -ne "---") { $sys.G350_Src } else { $sys.Folder }
-            $shouldCreate = ($sys.G350_Src -ne "---" -and (Test-Path (Join-Path $global:SourcePath $srcFolder)))
+            $shouldCreate = ($sys.G350_Src -ne "---" -and ([System.IO.Directory]::Exists((Join-Path $global:SourcePath $srcFolder))))
         }
         elseif ($OSTarget -match "RE") {
             $shouldCreate = ($sys.dArkOS -eq $true)
@@ -850,12 +851,12 @@ function Invoke-Generation {
             # --- THE SAFETY GATE: Check for Subfolders ---
             if ($folderName -match '[\\/]') {
                 $parentDir = Split-Path $targetPath -Parent
-                if (!(Test-Path $parentDir) -and (Split-Path $parentDir -Leaf)) {
+                if (!([System.IO.Directory]::Exists($parentDir)) -and (Split-Path $parentDir -Leaf)) {
                     New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
                 }
             }
 
-            if (!(Test-Path $targetPath)) {
+            if (!([System.IO.Directory]::Exists($targetPath))) {
                 New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
                 
                 # --- LOGGING ---
@@ -895,7 +896,7 @@ function Start-FileTransfer {
         # Fix for potential path-as-object vs path-as-string issues
         $path = if ($f.Path) { $f.Path } else { $f }
         
-        if (Test-Path $path) {
+        if ([System.IO.File]::Exists($path)) {
             $fInfo = New-Object System.IO.FileInfo($path)
             $totalBytes += $fInfo.Length
             [PSCustomObject]@{ 
@@ -949,8 +950,8 @@ function Start-FileTransfer {
 
         # --- EXECUTION: Professional Robocopy for Large Files ---
         # Logic: If file doesn't exist OR source is newer than target
-        if (!(Test-Path $targetFile) -or ($file.LastWrite -gt (Get-Item $targetFile).LastWriteTime)) {
-            if (!(Test-Path $targetDir)) { 
+        if (!([System.IO.File]::Exists($targetFile)) -or ($file.LastWrite -gt (Get-Item -LiteralPath $targetFile).LastWriteTime)) {
+            if (!([System.IO.Directory]::Exists($targetDir))) { 
                 New-Item -ItemType Directory -Path $targetDir -Force | Out-Null 
             }
             
@@ -1203,7 +1204,8 @@ function Invoke-Cleanup {
             }
 
             $targetPath = Join-Path $global:DestPath $dir.Name
-            if (Test-Path $targetPath) {
+            if ([System.IO.Directory]::Exists($targetPath)) {
+                # ← CHANGED THIS LINE From Test-Paths
                 Update-Log "Mirroring: $($dir.Name)..."
                 robocopy $dir.FullName $targetPath /MIR /R:1 /W:1 /NP /NFL /NDL /NJH /NJS /MT:8 | Out-Null
             }
@@ -1258,7 +1260,7 @@ function Invoke-G350Src {
         $srcName = if ($sys.G350_Src -ne "---") { $sys.G350_Src } else { $sys.Folder }
         $srcFull = Join-Path $global:SourcePath $srcName
         
-        if (Test-Path $srcFull -ErrorAction SilentlyContinue) {
+        if ([System.IO.Directory]::Exists($srcFull)) {
             # Recursively collect all existing ROM files inside this valid system folder
             $files = Get-ChildItem $srcFull -File -Recurse -ErrorAction SilentlyContinue
             if ($files) {
@@ -1271,7 +1273,8 @@ function Invoke-G350Src {
     if ($migrationList.Count -gt 0) {
         # Sends your filtered file array straight to your robust universal transfer UI
         Start-FileTransfer -FileList $migrationList -Title "G350 TO ARKOS MIGRATION"
-    } else {
+    }
+    else {
         [System.Windows.Forms.MessageBox]::Show(
             "No matching G350 folders containing ROM files were found inside the selected Master path.", 
             "Migration Empty", 
@@ -1349,15 +1352,15 @@ function Show-HelpManual {
         @{ Cmd = "[ UNIV SYNC ]"  ; Desc = "SAFE. Copies only missing files from Master to Target based on extension." },
         @{ Cmd = "[ CLEANUP ]"    ; Desc = "Cleans the TARGET only based on the selected Cleanup Mode.  Master is unchanged." },
         @{ Cmd = " (Mirr Source)" ; Desc = "Removes ._ files, empty folders, and junk to match the Target to the Master." },
-        @{ Cmd = " (Delete Empty)"; Desc = "Removes all empty folders on the Target, whether they exist on the Master or not." },
+        @{ Cmd = " (Delete Empty)"; Desc = "Removes ALL empty folders on the Target, ignores the Master if selected." },
         @{ Cmd = "[ PWR CLONE ]"  ; Desc = "BRUTE FORCE. Options: Folders Only, ROMs Only, System Only, or EVERYTHING." },
         @{ Cmd = " (System Only)" ; Desc = "Clones BIOS, Ports, Themes, and Tools folders and sub-folders only." },
         @{ Cmd = " (ROMs Only)"   ; Desc = "Clones ROMs only.  Geared for SD2 setups (Skips BIOS, Ports, and Tools)." },
         @{ Cmd = "[ SYS AUDIT ]"  ; Desc = "Generates a pipe-separated report (.txt) for review or spreadsheet import." },
-        @{ Cmd = "[ ABORT ]"      ; Desc = "Halts/pauses the current operation, re-click the operation to resume." },
+        @{ Cmd = "[ ABORT ]"      ; Desc = "Halts/Pauses the current operation. Re-click the operation to resume." },
         @{ Cmd = "[ GEN xxxOS ]"  ; Desc = "Creates the specific folder structure for ArkOS / dArkOS / dArkOS-RE." },
         @{ Cmd = "[ G350 Src  ]"  ; Desc = "Uses a stock G350 SD card as the source to append a clean ArkOS structure." },
-        @{ Cmd = "[ G350 Src. ]"  ; Desc = "Creates ONLY the folders with ROMs when SYNCHED to an empty target folder." }
+        @{ Cmd = "[ G350 Src. ]"  ; Desc = "Creates ONLY the folders with ROMs if synched to an empty target folder." }
     )
 
     foreach ($item in $HelpItems) {
@@ -1377,48 +1380,115 @@ function Test-Update {
         $ping = New-Object System.Net.NetworkInformation.Ping
         $reply = $ping.Send("1.1.1.1", 1000)
         if ($reply.Status -ne "Success") { return }
-    } catch { return }
+    }
+    catch { return }
 
     try {
-        # Programmatic endpoint for your public Git repository tags
-        $apiUrl = "https://github.com"
+        $apiUrl = "https://api.github.com/repos/$($global:RepoOwner)/$($global:RepoName)/releases/latest"
         $userAgent = "ArkOS-Utility-Script"
         
-        # Native connection parameter mapping to prevent 406 rejections
-        $tagsArray = Invoke-RestMethod -Uri $apiUrl -Method Get -UserAgent $userAgent -ContentType "application/json" -ErrorAction Stop 
+        $release = Invoke-RestMethod -Uri $apiUrl -Method Get -UserAgent $userAgent -ContentType "application/json" -ErrorAction Stop 
         
-        # Abort if the repository returns an empty collection block
-        if ($null -eq $tagsArray -or $tagsArray.Count -eq 0) { return } 
+        if ($null -eq $release) { return } 
         
-        # LEGACY FIX: Explicitly target array index [0] to extract data in PS 5.1
-        $rawTagName = $tagsArray[0].name
+        $rawTagName = $release.tag_name
         
-        # 1. CLEAN THE STRINGS (Strips out letters or "v" markers)
         $latestStr = $rawTagName -replace '[^0-9.]', '' 
         $currentStr = $global:Cvers -replace '[^0-9.]', '' 
         
-        # 2. SANITY CHECK: Abort if data parsing collapsed
         if ([string]::IsNullOrWhiteSpace($latestStr) -or [string]::IsNullOrWhiteSpace($currentStr)) { 
             return 
         } 
         
-        # 3. COMPARE VERSION OBJECTS
         if ([version]$latestStr -gt [version]$currentStr) { 
+            # Turn the GitHub link CYAN to indicate an update is available
+            $global:lblGitHub.LinkColor = [System.Drawing.Color]::Purple
+            
             Add-Type -AssemblyName System.Windows.Forms 
+            Add-Type -AssemblyName System.Drawing
             
-            $downloadUrl = "https://github.com"
-            $msg = "A new version of $($global:ScriptTitle) ($rawTagName) is available!`n`nDownload: $downloadUrl" 
+            $downloadUrl = "https://github.com/$($global:RepoOwner)/$($global:RepoName)/releases/latest"
             
-            [System.Windows.Forms.MessageBox]::Show(
-                $msg, 
-                "Update Available", 
-                [System.Windows.Forms.MessageBoxButtons]::OK, 
-                [System.Windows.Forms.MessageBoxIcon]::Information
-            ) | Out-Null
-        } 
+            # Create a custom form with clickable link
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = "Update Available"
+            $form.Width = 450
+            $form.Height = 210
+            $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+            $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+            $form.MaximizeBox = $false
+            $form.MinimizeBox = $false
+            
+            # Add title label
+            $titleLabel = New-Object System.Windows.Forms.Label
+            $titleLabel.Text = "A new version of $($global:ScriptTitle) ($rawTagName) is available!"
+            $titleLabel.Location = New-Object System.Drawing.Point(20, 20)
+            $titleLabel.Width = 410
+            $titleLabel.Height = 30
+            $titleLabel.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
+            $form.Controls.Add($titleLabel)
+            
+            # Add message with clickable link
+            $messagePanel = New-Object System.Windows.Forms.Panel
+            $messagePanel.Location = New-Object System.Drawing.Point(20, 60)
+            $messagePanel.Width = 410
+            $messagePanel.Height = 50
+            $messagePanel.AutoSize = $true
+            
+            # "To Download: " text
+            $downloadLabel = New-Object System.Windows.Forms.Label
+            $downloadLabel.Text = "To Download: "
+            $downloadLabel.Location = New-Object System.Drawing.Point(0, 0)
+            $downloadLabel.Width = 100
+            $downloadLabel.Height = 25
+            $downloadLabel.AutoSize = $true
+            $messagePanel.Controls.Add($downloadLabel)
+            
+            # "Click Here" link (keep dark blue)
+            $clickLink = New-Object System.Windows.Forms.LinkLabel
+            $clickLink.Text = "Click Here"
+            $clickLink.Location = New-Object System.Drawing.Point(90, 0)
+            $clickLink.Width = 100
+            $clickLink.Height = 25
+            $clickLink.AutoSize = $true
+            $clickLink.LinkColor = [System.Drawing.Color]::Blue
+            $clickLink.add_LinkClicked({
+                    [System.Diagnostics.Process]::Start($downloadUrl)
+                })
+            $messagePanel.Controls.Add($clickLink)
+            
+            $form.Controls.Add($messagePanel)
+            
+            # Add OK button
+            $okButton = New-Object System.Windows.Forms.Button
+            $okButton.Text = "OK"
+            $okButton.Location = New-Object System.Drawing.Point(185, 115)
+            $okButton.Width = 80
+            $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+            $form.Controls.Add($okButton)
+            $form.AcceptButton = $okButton
+            
+            # Add "Check for Updates" link at bottom left (blue reminder)
+            $updateLink = New-Object System.Windows.Forms.LinkLabel
+            $updateLink.Text = "Check for Updates"
+            $updateLink.Location = New-Object System.Drawing.Point(20, 175)
+            $updateLink.Width = 150
+            $updateLink.Height = 25
+            $updateLink.AutoSize = $true
+            $updateLink.LinkColor = [System.Drawing.Color]::Blue
+            $updateLink.add_LinkClicked({
+                    [System.Diagnostics.Process]::Start($downloadUrl)
+                })
+            $form.Controls.Add($updateLink)
+            
+            $form.ShowDialog() | Out-Null
+        }
+        else {
+            # User is on the latest version - turn the GitHub link back to GRAY
+            $global:lblGitHub.LinkColor = [System.Drawing.Color]::Gray
+        }
     } 
     catch { 
-        # Completely silent error safety shield
         Write-Debug "Update check failed: $($_.Exception.Message)" 
     } 
 }
@@ -1513,18 +1583,18 @@ $global:btnGenDarkRE.Add_Click({
     })
 
 $global:btnGenG350.Add_Click({
-    try {
-        Set-UIState -IsWorking $true
-        Start-Sleep -Milliseconds 100
-        Reset-ActionDisplay
+        try {
+            Set-UIState -IsWorking $true
+            Start-Sleep -Milliseconds 100
+            Reset-ActionDisplay
         
-        # FIX: Call the actual smart ROM migration function, not the folder generator!
-        Invoke-G350Src
-    } 
-    finally {
-        Set-UIState -IsWorking $false
-    }
-})
+            # FIX: Call the actual smart ROM migration function, not the folder generator!
+            Invoke-G350Src
+        } 
+        finally {
+            Set-UIState -IsWorking $false
+        }
+    })
 
 
 # --- 5.4: UTILITY & SAFETY EVENTS ---
@@ -1560,7 +1630,7 @@ $global:btnReset.Add_Click({
 # --- 5.4: GITHUB DYNAMIC LINK (Cleaned) ---
 $global:lblGitHub.add_LinkClicked({
         # We use the Global RepoName we defined in Section 0
-        $url = "https://github.com/jj1eckhardt-beep/ArkOS-Utility/tree/main"
+        $url = "https://github.com/$($global:RepoOwner)/$($global:RepoName)/releases/latest"
     
         # Start the browser
         Start-Process $url
