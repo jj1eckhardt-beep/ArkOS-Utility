@@ -35,7 +35,7 @@ $HeaderArt = @"
 	 |:                                 :|           Thank you to the ArkOS Wiki Page.
 	 |:                                 :|           Thank you to the Handheld community.
 	 |:          $ScriptFname1          :|           
-	 |:             $Cvers              :|
+	 |:             $Cvers              :|           
 	 |:           $BuildDate            :|           
 	 |:                                 :|           I Thank God for this day
 	 |:                                 :|           for the sun in the sky
@@ -81,7 +81,9 @@ Add-Type -AssemblyName System.Drawing
 
 # --- 1.2: GLOBAL CONFIGURATIONS ---
 # These variables control the behavior of Sync and Scan throughout the script
-$global:RomExtensions = @(".zip", ".7z", ".iso", ".chd", ".bin", ".cue", ".dosz", ".gba", ".gbc", ".gb", ".nes", ".sfc", ".smc", ".n64", ".pbp", ".nds", ".vmu", ".img", ".fds", ".md", ".gen", ".p8", ".sh", ".png", ".ldb", ".mgw", ".mp4", ".avi", ".mov", ".mpg", ".mpeg", ".wmv", ".mkv", ".mp3", ".ogg", ".webm", ".wav"".flac", ".rtf", ".rom", ".pup", ".pce", ".jar", ".ini", ".dat"".lo", ".srm", ",sig", ".s12")
+$global:RomExtensions = @(".zip", ".7z", ".iso", ".chd", ".bin", ".cue", ".dosz", ".gba", ".gbc", ".gb", ".nes", ".sfc", ".smc", ".n64",
+ ".pbp", ".nds", ".vmu", ".img", ".fds", ".md", ".gen", ".p8", ".sh", ".png", ".ldb", ".mgw", ".mp4", ".avi", ".mov", ".mpg", ".mpeg", ".wmv",
+ ".mkv", ".mp3", ".ogg", ".webm", ".wav",".flac", ".rtf", ".rom", ".pup", ".pce", ".jar", ".ini", ".dat", ".lo", ".srm", ",sig", ".s12")
 $global:SourcePath = ""
 $global:DestPath = ""
 $global:AbortSync = $false
@@ -279,7 +281,7 @@ $global:ColorGboxLine = [System.Drawing.ColorTranslator]::FromHtml("#2d2d2d")
 # --- 3.0: HEADER HELP OBJECT ---
 $global:lblHelpHint = New-Object System.Windows.Forms.LinkLabel
 $global:lblHelpHint.Text = "[?] How to use this tool" 
-$global:lblHelpHint.Location = New-Object System.Drawing.Point(15, 0) # Your requested X-coord
+$global:lblHelpHint.Location = New-Object System.Drawing.Point(15, 0) 
 $global:lblHelpHint.Size = New-Object System.Drawing.Size(160, 20)
 $global:lblHelpHint.LinkColor = [System.Drawing.Color]::DimGray
 $global:lblHelpHint.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
@@ -636,7 +638,8 @@ function Update-UIProgress {
         $remainStr = "--:--"
         if ($avgBps -gt 100kb) {
             $secondsLeft = ($TotalBytes - $BytesDone) / $avgBps
-            $remainStr = if ($secondsLeft -lt 3600) { [TimeSpan]::FromSeconds($secondsLeft).ToString("mm\:ss") } else { [TimeSpan]::FromSeconds($secondsLeft).ToString("hh\:mm\:ss") }
+            $remainStr = if ($secondsLeft -lt 3600) { [TimeSpan]::FromSeconds($secondsLeft).ToString("mm\:ss") } else {
+                 [TimeSpan]::FromSeconds($secondsLeft).ToString("hh\:mm\:ss") }
         }
 
         $speed = [Math]::Round($avgBps / 1MB, 1)
@@ -1128,7 +1131,8 @@ function Invoke-Cleanup {
         $msg = "DELETE EMPTY FOLDERS: This will scan the TARGET (SD) and permanently remove all empty directories.`n`nProceed?"
     }
 
-    if ([System.Windows.Forms.MessageBox]::Show($msg, "Critical Warning", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning) -ne [System.Windows.Forms.DialogResult]::Yes) { 
+    if ([System.Windows.Forms.MessageBox]::Show($msg, "Critical Warning", [System.Windows.Forms.MessageBoxButtons]::YesNo,
+     [System.Windows.Forms.MessageBoxIcon]::Warning) -ne [System.Windows.Forms.DialogResult]::Yes) { 
         return 
     }
 
@@ -1350,11 +1354,11 @@ function Show-HelpManual {
         @{ Cmd = "[ Sel MASTER ]" ; Desc = "Sets the path to your Master PC 'Gold Standard' ROM collection folder." },
         @{ Cmd = "[ Sel TARGET ]" ; Desc = "Sets the path to your Target SD Card, directory, or handheld device folder." },
         @{ Cmd = "[ UNIV SYNC ]"  ; Desc = "SAFE. Copies only missing files from Master to Target based on extension." },
-        @{ Cmd = "[ CLEANUP ]"    ; Desc = "Cleans the TARGET only based on the selected Cleanup Mode.  Master is unchanged." },
+        @{ Cmd = "[ CLEANUP ]"    ; Desc = "Cleans the TARGET based on the selected Cleanup Mode.  Master is unchanged." },
         @{ Cmd = " (Mirr Source)" ; Desc = "Removes ._ files, empty folders, and junk to match the Target to the Master." },
         @{ Cmd = " (Delete Empty)"; Desc = "Removes ALL empty folders on the Target, ignores the Master if selected." },
         @{ Cmd = "[ PWR CLONE ]"  ; Desc = "BRUTE FORCE. Options: Folders Only, ROMs Only, System Only, or EVERYTHING." },
-        @{ Cmd = " (System Only)" ; Desc = "Clones BIOS, Ports, Themes, and Tools folders and sub-folders only." },
+        @{ Cmd = " (System Only)" ; Desc = "Clones BIOS, Ports, Themes, and Tools folders with sub-folders only." },
         @{ Cmd = " (ROMs Only)"   ; Desc = "Clones ROMs only.  Geared for SD2 setups (Skips BIOS, Ports, and Tools)." },
         @{ Cmd = "[ SYS AUDIT ]"  ; Desc = "Generates a pipe-separated report (.txt) for review or spreadsheet import." },
         @{ Cmd = "[ ABORT ]"      ; Desc = "Halts/Pauses the current operation. Re-click the operation to resume." },
