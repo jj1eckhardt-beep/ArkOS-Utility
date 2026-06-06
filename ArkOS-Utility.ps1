@@ -10,7 +10,7 @@
 # ==============================================================================
 # 1. Manual Identity (Change these for new releases)
 $global:ScriptTitle = "ARKOS UTILITY"  # What people see in the UI
-$global:Cvers = "v1.2.7"               # The version number
+$global:Cvers = "v1.2.8"               # The version number
 $global:BuildDate = "2026.06.06"       # The build timestamp
 $global:RepoName = "ArkOS-Utility"     # For GitHub link consistency
 $global:RepoOwner = "jj1eckhardt-beep"
