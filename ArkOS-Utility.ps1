@@ -1,5 +1,5 @@
 # ==============================================================================
-# PROJECT: ArkOS-Utility
+# PROJECT: dArkOS-Utility
 # PURPOSE: High-speed ArkOS ROM migration utility.
 # AUTHOR:  [jj1eckhardt]
 # ==============================================================================
@@ -9,9 +9,9 @@
 # SECTION 0: INITIALIZATION & IDENTITY
 # ==============================================================================
 # 1. Manual Identity (Change these for new releases)
-$global:ScriptTitle = "ARKOS UTILITY"  # What people see in the UI
-$global:Cvers = "v1.2.8"               # The version number
-$global:BuildDate = "2026.06.06"       # The build timestamp
+$global:ScriptTitle = "dArkOS UTILITY"  # What people see in the UI
+$global:Cvers = "v1.3.0"               # The version number
+$global:BuildDate = "2026.11.26"       # The build timestamp
 $global:RepoName = "ArkOS-Utility"     # For GitHub link consistency
 $global:RepoOwner = "jj1eckhardt-beep"
 
@@ -30,35 +30,38 @@ $global:AbortArchive = $false
 # ==============================================================================
 
 $HeaderArt = @"
-	  ___________________________________
-	 /...................................\
-	 |:                                 :|           Thank you to the ArkOS Wiki Page.
-	 |:                                 :|           Thank you to the Handheld community.
-	 |:          $ScriptFname1          :|           
-	 |:             $Cvers              :|           
-	 |:           $BuildDate            :|           
-	 |:                                 :|           I Thank God for this day
-	 |:                                 :|           for the sun in the sky
-	 |:                                 :|           for my mom and my dad
-	 |:                                 :|           and my piece of apple pie
-	 |:                                 :|               
-	 |:           jj1eckhardt           :|               ~Veggie Tales~
-	 |:.................................:|             
-	 |              __ . __              |
-	 |      __      . ___ .              |
-	 |     |  |     __ . __    ( X )     |
-	 |  ___|  |___                       |
-	 | |          |        ( Y )   ( A ) |
- 	 | |___    ___|                      |
-	 |     |  |       fun      ( B )     |
-	 |     |__|      ( F )               |
-	 |            ( S ) ( S )            |
-	 |     ___   select  start   ___     |
-	 |    /   \                 /   \    |
-	 |   {     }               {     }   |
-	 |    \___/                 \___/    |
-	 \___________________________________/	
+     ___________________________________
+    /...................................\
+    |:                                 :|   Thank you to the ArkOS Wiki Page.
+    |:                                 :|   Thank you to the Handheld community.
+    |:          $ScriptFname1          :|   Thank you especially to the Developers.
+    |:             $Cvers              :|
+    |:           $BuildDate            :|
+    |:                                 :|   I Thank God for this day
+    |:                                 :|   for the sun in the sky
+    |:                                 :|   for my mom and my dad
+    |:                                 :|   and my piece of apple pie
+    |:                                 :|
+    |:           jj1eckhardt           :|       ~Veggie Tales~
+    |:.................................:|
+    |              __ . __              |
+    |      __      . ___ .              |
+    |     |  |     __ . __    ( X )     |
+    |  ___|  |___                       |
+    | |          |        ( Y )   ( A ) |
+    | |___    ___|                      |
+    |     |  |       fun      ( B )     |
+    |     |__|      ( F )               |
+    |            ( S ) ( S )            |
+    |     ___   select  start   ___     |
+    |    /   \                 /   \    |
+    |   {     }               {     }   |
+    |    \___/                 \___/    |
+    \___________________________________/
 "@
+
+# Force Windows line endings
+$HeaderArt = $HeaderArt -replace '(?<!\r)\n', "`r`n" # force CRLF no matter how the file is saved
 
 # To display it in the console during launch:
 Write-Host $HeaderArt -ForegroundColor Cyan
@@ -81,15 +84,104 @@ Add-Type -AssemblyName System.Drawing
 
 # --- 1.2: GLOBAL CONFIGURATIONS ---
 # These variables control the behavior of Sync and Scan throughout the script
-$global:RomExtensions = @(".zip", ".7z", ".iso", ".chd", ".bin", ".cue", ".dosz", ".gba", ".gbc", ".gb", ".nes", ".sfc", ".smc", ".n64",
- ".pbp", ".nds", ".vmu", ".img", ".fds", ".md", ".gen", ".p8", ".sh", ".png", ".ldb", ".mgw", ".mp4", ".avi", ".mov", ".mpg", ".mpeg", ".wmv",
- ".mkv", ".mp3", ".ogg", ".webm", ".wav",".flac", ".rtf", ".rom", ".pup", ".pce", ".jar", ".ini", ".dat", ".lo", ".srm", ",sig", ".s12")
+# ============================================================
+# EXTENSION CATEGORIES
+# ============================================================
+
+# Actual playable game files (what should be counted as "ROMs")
+$global:GameExtensions = @(
+    # Archives that usually contain games
+    ".zip", ".7z", ".rar",
+
+    # Disc / CD images
+    ".iso", ".chd", ".bin", ".cue", ".img", ".cso", ".gdi", ".cdi",
+    ".mds", ".mdf", ".nrg", ".ccd", ".toc", ".m3u", ".m3u8",
+
+    # Nintendo
+    ".nes", ".unf", ".unif", ".nez", ".fds",
+    ".sfc", ".smc", ".fig", ".swc", ".snes",
+    ".n64", ".z64", ".v64", ".u64", ".ndd",
+    ".gcm", ".gcz", ".rvz", ".tgc", ".wia",
+    ".wbfs", ".wdf", ".wad",
+    ".wud", ".wux", ".wua", ".rpx",
+    ".xci", ".nsp", ".nsz", ".nca",
+    ".gb", ".gbc", ".sgb", ".gba", ".agb", ".srl",
+    ".nds", ".dsi", ".ids",
+    ".3ds", ".cia", ".cci", ".cxi", ".3dsx",
+    ".min", ".vb", ".vboy",
+
+    # Sega
+    ".sg", ".sc", ".sms", ".gg",
+    ".md", ".gen", ".smd", ".32x",
+
+    # Sony
+    ".pbp", ".vpk", ".pkg",
+
+    # Other systems
+    ".pce", ".sgx",
+    ".ngp", ".ngc", ".ngpc",
+    ".ws", ".wsc",
+    ".lnx", ".lyx",
+    ".a26", ".a52", ".a78",
+    ".j64", ".jag",
+    ".col", ".cv", ".int", ".vec",
+    ".p8",                # Pico-8 source
+    ".mgw", ".vmu", ".dosz",
+    ".rom"
+)
+
+# Box art / images (and Pico-8 special case)
+$global:BoxArtExtensions = @(
+    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"
+)
+
+# Gamelist / metadata files
+$global:GamelistExtensions = @(
+    ".xml",               # gamelist.xml, etc.
+    ".json",
+    ".txt", ".csv"
+)
+
+# Support files (saves, configs, patches, videos, manuals, etc.)
+$global:SupportExtensions = @(
+    # Saves
+    ".srm", ".sav", ".dsv", ".eep", ".mpk", ".mcr", ".ps2",
+
+    # Patches
+    ".ips", ".bps", ".ups",
+
+    # Configs / data
+    ".ini", ".dat", ".cfg", ".sig",
+
+    # Videos / audio (trailers, music, etc.)
+    ".mp4", ".avi", ".mov", ".mpg", ".mpeg", ".wmv", ".mkv", ".webm",
+    ".mp3", ".ogg", ".wav", ".flac", ".aac",
+
+    # Other support
+    ".pdf", ".rtf", ".sh", ".bat", ".cmd", ".jar",
+    ".pup", ".lo", ".ldb", ".s12"
+)
+
+# Master list (for any code that still needs "everything")
+$global:RomExtensions = $global:GameExtensions + 
+                        $global:BoxArtExtensions + 
+                        $global:GamelistExtensions + 
+                        $global:SupportExtensions
+
 $global:SourcePath = ""
 $global:DestPath = ""
 $global:AbortSync = $false
 $global:TransferActive = $false
 $global:CurrentBytes = 0
 $global:CurrentFile = "Initializing..."
+$script:ReportWidth = 104
+# ============================================================
+# Report Generation Toggles
+# ============================================================
+$script:GenerateAuditTxt = $true    # Human-readable .txt report
+$script:GenerateAuditCsv = $false    # Clean .csv for Excel
+$script:GenerateSdTxt = $false
+$script:GenerateSdCsv = $true
 
 # --- 1.3: MASTER SYSTEM DATABASE (Rows 1-140) ---
 # The source of truth for folder names and aliases across all OS variants
@@ -145,6 +237,7 @@ $global:SystemDatabase = @(
     [PSCustomObject]@{ID = 45    ; Name = "Nintendo Game Boy"       ; Folder = "gb"               ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "45" },     
     [PSCustomObject]@{ID = 46    ; Name = "Game Boy Advance"        ; Folder = "gba"              ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "46" },     
     [PSCustomObject]@{ID = 47    ; Name = "Game Boy Color"          ; Folder = "gbc"              ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "47" },     
+    [PSCustomObject]@{ID = 47.1  ; Name = "Game Cube (RK3566)"      ; Folder = "gc"               ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "47.1" },     
     [PSCustomObject]@{ID = 48    ; Name = "Genesis/Megadrive"       ; Folder = "genesis"          ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "48" },     
     [PSCustomObject]@{ID = 49    ; Name = "Amstrad GX4000"          ; Folder = "gx4000"           ; Alias = "---"         ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "49" },     
     [PSCustomObject]@{ID = 50    ; Name = "Intellivision"           ; Folder = "intellivision"    ; Alias = "intv"        ; G350_Src = "---"              ; ArkOS = $true    ; dArkOS = $true    ; RE_ID = "50" },     
@@ -252,7 +345,7 @@ $global:SystemDatabase = @(
 # --- 2.1: MAIN WINDOW DEFINITION ---
 # The primary container for the entire utility
 $global:Form = New-Object System.Windows.Forms.Form
-$global:Form.Size = New-Object System.Drawing.Size(820, 950)
+$global:Form.Size = New-Object System.Drawing.Size(820, 850)
 $global:Form.StartPosition = "CenterScreen"
 $global:Form.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#f0f0f0")
 $global:Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
@@ -294,13 +387,20 @@ $global:lblHelpHint.add_LinkClicked({ Show-HelpManual })
 $global:btnMaster = New-Object Windows.Forms.Button
 $global:btnMaster.Text = "1. Select MASTER (PC)"
 $global:btnMaster.Location = New-Object System.Drawing.Point(30, 20)
-$global:btnMaster.Size = New-Object System.Drawing.Size(360, 45)
+$global:btnMaster.Size = New-Object System.Drawing.Size(295, 45)
 $global:btnMaster.BackColor = $global:ColorButtonGray
+
+$global:btnReset = New-Object Windows.Forms.Button
+$global:btnReset.Text = "Reset ALL Paths"
+$global:btnReset.Location = New-Object System.Drawing.Point(330, 20)
+$global:btnReset.Size = New-Object System.Drawing.Size(140, 45)
+$global:btnReset.BackColor = $global:ColorButtonGray
+$global:btnReset.Font = New-Object Drawing.Font("Segoe UI", 9, [Drawing.FontStyle]::Bold)
 
 $global:btnSD = New-Object Windows.Forms.Button
 $global:btnSD.Text = "2. Select TARGET (SD/PC)"
-$global:btnSD.Location = New-Object System.Drawing.Point(410, 20)
-$global:btnSD.Size = New-Object System.Drawing.Size(360, 45)
+$global:btnSD.Location = New-Object System.Drawing.Point(475, 20)
+$global:btnSD.Size = New-Object System.Drawing.Size(295, 45)
 $global:btnSD.BackColor = $global:ColorButtonGray
 
 # --- 3.2: STATUS DISPLAY (PATHs BOX) ---
@@ -313,24 +413,16 @@ $global:lblStatus.Font = New-Object Drawing.Font("Consolas", 9)
 $global:lblStatus.BackColor = $global:ColorDarkPanel
 $global:lblStatus.ForeColor = [System.Drawing.Color]::White
 
-# --- 3.3: RESET & SYNC ROW ---
-$global:btnReset = New-Object Windows.Forms.Button
-$global:btnReset.Text = "RESET ALL SELECTIONS"
-$global:btnReset.Location = New-Object System.Drawing.Point(30, 130)
-$global:btnReset.Size = New-Object System.Drawing.Size(740, 40)
-$global:btnReset.BackColor = $global:ColorButtonGray
-$global:btnReset.Font = New-Object Drawing.Font("Segoe UI", 9, [Drawing.FontStyle]::Bold)
-
 $global:btnSync = New-Object Windows.Forms.Button
 $global:btnSync.Text = "UNIVERSAL SYNC"
-$global:btnSync.Location = New-Object System.Drawing.Point(30, 185)
+$global:btnSync.Location = New-Object System.Drawing.Point(30, 130)
 $global:btnSync.Size = New-Object System.Drawing.Size(295, 55)
 $global:btnSync.BackColor = $global:ColorSyncBlue
 $global:btnSync.Enabled = $false
 
 $global:btnAbort = New-Object Windows.Forms.Button
 $global:btnAbort.Text = "ABORT"
-$global:btnAbort.Location = New-Object System.Drawing.Point(330, 185)
+$global:btnAbort.Location = New-Object System.Drawing.Point(330, 130)
 $global:btnAbort.Size = New-Object System.Drawing.Size(65, 55)
 $global:btnAbort.BackColor = $global:ColorAbortRed
 $global:btnAbort.ForeColor = [System.Drawing.Color]::White
@@ -339,7 +431,7 @@ $global:btnAbort.Enabled = $false
 
 $global:btnCleanup = New-Object Windows.Forms.Button
 $global:btnCleanup.Text = "CLEANUP"
-$global:btnCleanup.Location = New-Object System.Drawing.Point(402, 185)
+$global:btnCleanup.Location = New-Object System.Drawing.Point(402, 130)
 $global:btnCleanup.Size = New-Object System.Drawing.Size(180, 55)
 $global:btnCleanup.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#ffb6c1")
 $global:btnCleanup.Enabled = $false
@@ -347,8 +439,8 @@ $global:btnCleanup.Enabled = $false
 # Cleanup Mode GroupBox
 $global:gbCleanMode = New-Object Windows.Forms.GroupBox
 $global:gbCleanMode.Text = "Cleanup Mode Select"
-$global:gbCleanMode.Location = New-Object System.Drawing.Point(592, 182)
-$global:gbCleanMode.Size = New-Object System.Drawing.Size(175, 57)
+$global:gbCleanMode.Location = New-Object System.Drawing.Point(592, 127)
+$global:gbCleanMode.Size = New-Object System.Drawing.Size(173, 57)
 $global:gbCleanMode.ForeColor = [System.Drawing.Color]::Black
 $global:gbCleanMode.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
 
@@ -367,42 +459,20 @@ $global:rbDeleteEmpty.AutoSize = $true
 
 $global:gbCleanMode.Controls.AddRange(@($global:rbMirrsource, $global:rbDeleteEmpty))
 
-
-# --- 3.4: OS GENERATION & TOOLS ---
-$global:btnGenArk = New-Object Windows.Forms.Button
-$global:btnGenArk.Text = "GEN: ArkOS"
-$global:btnGenArk.Location = New-Object System.Drawing.Point(30, 255)
-$global:btnGenArk.Size = New-Object System.Drawing.Size(180, 55)
-$global:btnGenArk.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#99FF00")
-$global:btnGenArk.Enabled = $false
-
-$global:btnGenDark = New-Object Windows.Forms.Button
-$global:btnGenDark.Text = "GEN: dArkOS"
-$global:btnGenDark.Location = New-Object System.Drawing.Point(216, 255)
-$global:btnGenDark.Size = New-Object System.Drawing.Size(180, 55)
-$global:btnGenDark.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#66FF00")
-$global:btnGenDark.Enabled = $false
-
-$global:btnGenDarkRE = New-Object Windows.Forms.Button
-$global:btnGenDarkRE.Text = "GEN: dArkOS-RE"
-$global:btnGenDarkRE.Location = New-Object System.Drawing.Point(402, 255)
-$global:btnGenDarkRE.Size = New-Object System.Drawing.Size(180, 55)
-$global:btnGenDarkRE.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#33FF00")
-$global:btnGenDarkRE.Enabled = $false
-
-$global:btnGenG350 = New-Object Windows.Forms.Button
-$global:btnGenG350.Text = "G350 Source"
-$global:btnGenG350.Location = New-Object System.Drawing.Point(588, 255)
-$global:btnGenG350.Size = New-Object System.Drawing.Size(182, 55)
-$global:btnGenG350.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#ffeb3b")
-$global:btnGenG350.Font = New-Object Drawing.Font("Segoe UI", 9, [Drawing.FontStyle]::Bold)
-$global:btnGenG350.Enabled = $false
+# --- 3.6: POWER CLONE BUTTON (unShrunk & unCentered) ---
+$global:btnPowerClone = New-Object Windows.Forms.Button
+$global:btnPowerClone.Text = "POWER CLONE"
+$global:btnPowerClone.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#ffd700")
+$global:btnPowerClone.ForeColor = [System.Drawing.Color]::White
+$global:btnPowerClone.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+$global:btnPowerClone.Size = New-Object System.Drawing.Size(365, 55) 
+$global:btnPowerClone.Location = New-Object System.Drawing.Point(30, 190) # Adjusted for the new center
 
 # --- 3.5: CLONE MODE GROUPBOX (Expanded & Aligned) ---
 $global:gbCloneMode = New-Object Windows.Forms.GroupBox
 $global:gbCloneMode.Text = "Clone Mode Select"
-$global:gbCloneMode.Location = New-Object System.Drawing.Point(405, 322)
-$global:gbCloneMode.Size = New-Object System.Drawing.Size(360, 57)
+$global:gbCloneMode.Location = New-Object System.Drawing.Point(405, 187)
+$global:gbCloneMode.Size = New-Object System.Drawing.Size(359, 57)
 $global:gbCloneMode.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
 
 # Left Side Column
@@ -434,73 +504,151 @@ $global:gbCloneMode.Controls.AddRange(@(
         $global:rbRomsOnly
     ))
 
-# --- 3.6: POWER CLONE BUTTON (unShrunk & unCentered) ---
-$global:btnPowerClone = New-Object Windows.Forms.Button
-$global:btnPowerClone.Text = "POWER CLONE"
-$global:btnPowerClone.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#ffd700")
-$global:btnPowerClone.ForeColor = [System.Drawing.Color]::White
-$global:btnPowerClone.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-# Sizing & Alignment
-$global:btnPowerClone.Size = New-Object System.Drawing.Size(365, 55) 
-$global:btnPowerClone.Location = New-Object System.Drawing.Point(30, 325) # Adjusted for the new center
+# --- 3.4: OS GENERATION & TOOLS ---
+$global:btnGenArk = New-Object Windows.Forms.Button
+$global:btnGenArk.Text = "GEN: ArkOS"
+$global:btnGenArk.Location = New-Object System.Drawing.Point(30, 252)
+$global:btnGenArk.Size = New-Object System.Drawing.Size(180, 55)
+$global:btnGenArk.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#99FF00")
+$global:btnGenArk.Enabled = $false
+
+$global:btnGenDark = New-Object Windows.Forms.Button
+$global:btnGenDark.Text = "GEN: dArkOS"
+$global:btnGenDark.Location = New-Object System.Drawing.Point(215, 252)
+$global:btnGenDark.Size = New-Object System.Drawing.Size(180, 55)
+$global:btnGenDark.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#66FF00")
+$global:btnGenDark.Enabled = $false
+
+$global:btnGenDarkRE = New-Object Windows.Forms.Button
+$global:btnGenDarkRE.Text = "GEN: dArkOS-RE"
+$global:btnGenDarkRE.Location = New-Object System.Drawing.Point(401, 252)
+$global:btnGenDarkRE.Size = New-Object System.Drawing.Size(180, 55)
+$global:btnGenDarkRE.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#33FF00")
+$global:btnGenDarkRE.Enabled = $false
+
+$global:btnGenG350 = New-Object Windows.Forms.Button
+$global:btnGenG350.Text = "G350 Source"
+$global:btnGenG350.Location = New-Object System.Drawing.Point(587, 252)
+$global:btnGenG350.Size = New-Object System.Drawing.Size(180, 55)
+$global:btnGenG350.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#ffeb3b")
+$global:btnGenG350.Font = New-Object Drawing.Font("Segoe UI", 9, [Drawing.FontStyle]::Bold)
+$global:btnGenG350.Enabled = $false
+
+# The Audit Button
+$global:btnAudit = New-Object System.Windows.Forms.Button
+$global:btnAudit.Text = "RUN FULL 130-SYSTEM AUDIT"
+$global:btnAudit.Location = New-Object System.Drawing.Point(30, 315)
+$global:btnAudit.Size = New-Object System.Drawing.Size(180, 55)
+$global:btnAudit.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#e0e0e0")
+$global:btnAudit.Enabled = $false # Keep disabled until paths are set
+
+# File Report Enable GroupBox for Audit
+$global:gbToggleAudit = New-Object Windows.Forms.GroupBox
+$global:gbToggleAudit.Text = "File Creation Toggle"
+$global:gbToggleAudit.Location = New-Object System.Drawing.Point(215, 312)
+$global:gbToggleAudit.Size = New-Object System.Drawing.Size(175, 57)
+$global:gbToggleAudit.ForeColor = [System.Drawing.Color]::Black
+$global:gbToggleAudit.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
+
+# .txt checkbox for Audit
+$global:chkToggleAtxt = New-Object Windows.Forms.CheckBox
+$global:chkToggleAtxt.Text = "Create .txt"
+$global:chkToggleAtxt.Location = New-Object System.Drawing.Point(10, 16)
+$global:chkToggleAtxt.ForeColor = [System.Drawing.Color]::Black
+$global:chkToggleAtxt.AutoSize = $true
+$global:chkToggleAtxt.Checked = $script:GenerateAuditTxt   # start with current setting
+
+# .csv checkbox for Audit
+$global:chkToggleAcsv = New-Object Windows.Forms.CheckBox
+$global:chkToggleAcsv.Text = "Create .csv"
+$global:chkToggleAcsv.Location = New-Object System.Drawing.Point(10, 34)
+$global:chkToggleAcsv.ForeColor = [System.Drawing.Color]::Black
+$global:chkToggleAcsv.AutoSize = $true
+$global:chkToggleAcsv.Checked = $script:GenerateAuditCsv   # start with current setting
+
+$global:gbToggleAudit.Controls.AddRange(@($global:chkToggleAtxt, $global:chkToggleAcsv))
+
+# The SD Card Speed Test Button
+$global:btnSDSpeed = New-Object System.Windows.Forms.Button
+$global:btnSDSpeed.Text = "RUN WinSAT SD Speed Test"
+$global:btnSDSpeed.Location = New-Object System.Drawing.Point(401, 315)
+$global:btnSDSpeed.Size = New-Object System.Drawing.Size(180, 55)
+$global:btnSDSpeed.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#e0e0e0")
+$global:btnSDSpeed.Enabled = $true   # Keep disabled until paths are set
+
+# File Report Enable GroupBox for Speed Test
+$global:gbToggleSDSpeed = New-Object Windows.Forms.GroupBox
+$global:gbToggleSDSpeed.Text = "File Creation Toggle"
+$global:gbToggleSDSpeed.Location = New-Object System.Drawing.Point(587, 312)
+$global:gbToggleSDSpeed.Size = New-Object System.Drawing.Size(175, 57)
+$global:gbToggleSDSpeed.ForeColor = [System.Drawing.Color]::Black
+$global:gbToggleSDSpeed.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
+
+# .txt checkbox for Speed Test
+$global:chkToggleStxt = New-Object Windows.Forms.CheckBox
+$global:chkToggleStxt.Text = "Create .txt"
+$global:chkToggleStxt.Location = New-Object System.Drawing.Point(10, 16)
+$global:chkToggleStxt.ForeColor = [System.Drawing.Color]::Black
+$global:chkToggleStxt.AutoSize = $true
+$global:chkToggleStxt.Checked = $script:GenerateSdTxt
+
+# .csv checkbox for Speed Test
+$global:chkToggleScsv = New-Object Windows.Forms.CheckBox
+$global:chkToggleScsv.Text = "Append .csv"
+$global:chkToggleScsv.Location = New-Object System.Drawing.Point(10, 34)
+$global:chkToggleScsv.ForeColor = [System.Drawing.Color]::Black
+$global:chkToggleScsv.AutoSize = $true
+$global:chkToggleScsv.Checked = $script:GenerateSdCsv
+
+$global:gbToggleSDSpeed.Controls.AddRange(@($global:chkToggleStxt, $global:chkToggleScsv))
 
 # --- 3.6: MONITORING (PROGRESS & LOG) ---
 
-# --- Create a Timer that runs every 500ms to update the clock ---
-# 1. CREATE the object first
+# --- Create a lighter timer (1 second is plenty) ---
 $global:UITimer = New-Object System.Windows.Forms.Timer
-# 2. SET the properties
-$global:UITimer.Interval = 500
-# 3. NOW add the logic (This is where the error was happening)
+$global:UITimer.Interval = 1000   # was 500 – less frequent is much better
+
 $global:UITimer.add_Tick({
-        if ($global:TransferActive) {
-            Update-UIProgress `
-                -BytesDone  $global:CurrentBytes `
-                -TotalBytes $global:TotalJobBytes `
-                -Stopwatch  $global:TransferWatch `
-                -FileName   $global:CurrentFile
-        }
-    })
-# 4. START it
+    if ($global:TransferActive) {
+        Update-UIProgress `
+            -BytesDone  $global:CurrentBytes `
+            -TotalBytes $global:TotalJobBytes `
+            -Stopwatch  $global:TransferWatch `
+            -FileName   $global:CurrentFile
+    }
+})
 $global:UITimer.Start()
 
 $global:lblAction = New-Object Windows.Forms.Label
 $global:lblAction.Text = "Ready"
-$global:lblAction.Location = New-Object System.Drawing.Point(30, 455)
+$global:lblAction.Location = New-Object System.Drawing.Point(30, 380)
 $global:lblAction.Size = New-Object System.Drawing.Size(740, 25)
 $global:lblAction.Font = New-Object Drawing.Font("Consolas", 10)
-$global:lblAction.Visible = $false  # <--- HIDE UNTIL NEEDED
+$global:lblAction.Visible = $true  # <--- HIDE UNTIL NEEDED
 
 $global:ProgressBar = New-Object Windows.Forms.ProgressBar
-$global:ProgressBar.Location = New-Object System.Drawing.Point(30, 480)
+$global:ProgressBar.Location = New-Object System.Drawing.Point(30, 400)
 $global:ProgressBar.Size = New-Object System.Drawing.Size(735, 25)
-$global:ProgressBar.Visible = $false  # <--- HIDE BY DEFAULT
+$global:ProgressBar.Visible = $true  # <--- HIDE BY DEFAULT
 
 $global:Log = New-Object Windows.Forms.TextBox
 $global:Log.Multiline = $true
 $global:Log.ReadOnly = $true
-$global:Log.Location = New-Object System.Drawing.Point(30, 520)
+$global:Log.Location = New-Object System.Drawing.Point(30, 435)
 $global:Log.Size = New-Object System.Drawing.Size(760, 350)
-$global:Log.ScrollBars = "Vertical"
+$global:Log.ScrollBars = "vertical"
+$global:Log.WordWrap = $false          # ← critical
 $global:Log.Font = New-Object Drawing.Font("Consolas", 9)
 $global:Log.BackColor = $global:ColorDarkPanel
 $global:Log.ForeColor = [System.Drawing.Color]::White
 
-# --- 3.7: FOOTER & GITHUB LINK ---
-# The Big Audit Button
-$global:btnAudit = New-Object System.Windows.Forms.Button
-$global:btnAudit.Text = "RUN FULL 130-SYSTEM AUDIT"
-$global:btnAudit.Location = New-Object System.Drawing.Point(30, 395)
-$global:btnAudit.Size = New-Object System.Drawing.Size(740, 45)
-$global:btnAudit.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#e0e0e0")
-$global:btnAudit.Enabled = $false # Keep disabled until paths are set
 
-# --- 3.8: HEADER & TITLE ---
+# --- 3.7: FOOTER & GITHUB LINK ---
 
 $global:lblGitHub = New-Object System.Windows.Forms.LinkLabel
 # Use single quotes around the whole string so the double quotes stay as text
 $global:lblGitHub.Text = "$global:ScriptFname1 $global:Cvers | GitHub.com | Click for Updates"
-$global:lblGitHub.Location = New-Object System.Drawing.Point(30, 890)
+$global:lblGitHub.Location = New-Object System.Drawing.Point(30, 790)
 $global:lblGitHub.Size = New-Object System.Drawing.Size(400, 20)
 $global:lblGitHub.LinkColor = [System.Drawing.Color]::Gray
 $global:lblGitHub.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Italic)
@@ -512,14 +660,14 @@ $global:lblGitHub.LinkArea = New-Object System.Windows.Forms.LinkArea(0, $global
 # 1. The Static Text (Gray)
 $global:lblSupportText = New-Object System.Windows.Forms.Label
 $global:lblSupportText.Text = "Support"
-$global:lblSupportText.Location = New-Object Drawing.Point(722, 890) # Matches GitHub Y-axis
+$global:lblSupportText.Location = New-Object Drawing.Point(722, 790) # Matches GitHub Y-axis
 $global:lblSupportText.AutoSize = $true
 $global:lblSupportText.ForeColor = [System.Drawing.Color]::Gray
 $global:lblSupportText.Font = New-Object Drawing.Font("Segoe UI Symbol", 9, [System.Drawing.FontStyle]::Italic)
 # 2. The Heart (Red)
 $global:lblSupport = New-Object System.Windows.Forms.LinkLabel
 $global:lblSupport.Text = "$([char]0x2764)" # Heart Unicode (U+2764)
-$global:lblSupport.Location = New-Object System.Drawing.Point(772, 890)
+$global:lblSupport.Location = New-Object System.Drawing.Point(772, 790)
 $global:lblSupport.AutoSize = $true
 $global:lblSupport.LinkColor = [System.Drawing.Color]::Red
 $global:lblSupport.Font = New-Object System.Drawing.Font("Segoe UI Symbol", 10, [System.Drawing.FontStyle]::Bold)
@@ -601,59 +749,60 @@ function Test-PathsReady {
 
 # Function 4.2: Universal Progress Bar & Dashboard Updater
 function Update-UIProgress {
-    param($BytesDone, $TotalBytes, $Stopwatch, $FileName)
+    param(
+        [long]$BytesDone,
+        [long]$TotalBytes,
+        $Stopwatch,
+        [string]$FileName
+    )
 
-    # --- 1. INITIALIZE PERSISTENT COUNTERS ---
-    if ($null -eq $global:SpeedSamples) { $global:SpeedSamples = [System.Collections.Generic.Queue[double]]::new() }
+    # --- Percentage (always update the bar, it’s relatively cheap) ---
+    $percent = if ($TotalBytes -gt 0) {
+        [math]::Min(100, [int](($BytesDone / $TotalBytes) * 100))
+    } else { 0 }
 
-    # --- 2. PERCENTAGE & UI RESPONSIVENESS ---
-    $percent = if ($TotalBytes -gt 0) { [math]::Min(100, [int](($BytesDone / $TotalBytes) * 100)) } else { 0 }
-    $global:ProgressBar.Value = $percent
+    if ($global:ProgressBar.Value -ne $percent) {
+        $global:ProgressBar.Value = $percent
+    }
 
-    # --- 3. REAL-TIME ELAPSED COUNTER ---
-    $elapsed = $Stopwatch.Elapsed
-    $elapsedStr = $elapsed.ToString("hh\:mm\:ss")
-
-    # --- 4. CALCULATE SMOOTHED SPEED & ETA ---
-    # We update math/text every 400ms OR if the filename changes (whichever happens first)
+    # --- Only do the expensive text/speed work every ~1 second ---
     $now = $Stopwatch.Elapsed.TotalMilliseconds
     if ($null -eq $global:LastUpdate) { $global:LastUpdate = 0 }
 
-    if (($now - $global:LastUpdate) -gt 400 -or $global:lastFileName -ne $FileName) {
-        $global:LastUpdate = $now
-        $global:lastFileName = $FileName # Remember the file for the next loop
+    if (($now - $global:LastUpdate) -lt 900) { return }   # skip most of the work
+    $global:LastUpdate = $now
 
-        $currentBps = if ($elapsed.TotalSeconds -gt 0) { $BytesDone / $elapsed.TotalSeconds } else { 0 }
+    # --- Elapsed time ---
+    $elapsed = $Stopwatch.Elapsed
+    $elapsedStr = $elapsed.ToString("hh\:mm\:ss")
 
-        # Update Rolling Window
-        $global:SpeedSamples.Enqueue($currentBps)
-        if ($global:SpeedSamples.Count -gt 10) { [void]$global:SpeedSamples.Dequeue() }
+    # --- Simple speed calculation (no rolling queue needed for good enough results) ---
+    $seconds = $elapsed.TotalSeconds
+    $avgBps  = if ($seconds -gt 0.5) { $BytesDone / $seconds } else { 0 }
+    $speed   = [math]::Round($avgBps / 1MB, 1)
 
-        # Average the speed
-        $avgBps = 0
-        $global:SpeedSamples | ForEach-Object { $avgBps += $_ }
-        $avgBps = $avgBps / $global:SpeedSamples.Count
-
-        # Calculate ETA
-        $remainStr = "--:--"
-        if ($avgBps -gt 100kb) {
-            $secondsLeft = ($TotalBytes - $BytesDone) / $avgBps
-            $remainStr = if ($secondsLeft -lt 3600) { [TimeSpan]::FromSeconds($secondsLeft).ToString("mm\:ss") } else {
-                 [TimeSpan]::FromSeconds($secondsLeft).ToString("hh\:mm\:ss") }
+    # --- ETA ---
+    $remainStr = "--:--"
+    if ($avgBps -gt 50KB -and $TotalBytes -gt $BytesDone) {
+        $secondsLeft = ($TotalBytes - $BytesDone) / $avgBps
+        $ts = [TimeSpan]::FromSeconds($secondsLeft)
+        $remainStr = if ($ts.TotalHours -ge 1) {
+            $ts.ToString("hh\:mm\:ss")
+        } else {
+            $ts.ToString("mm\:ss")
         }
-
-        $speed = [Math]::Round($avgBps / 1MB, 1)
-        $displayName = if ($FileName.Length -gt 20) { $FileName.Substring(0, 17) + "..." } else { $FileName }
-
-        # --- 5. UPDATE THE DASHBOARD ---
-        $template = "Progress: {0,3}% | {1,4} MB/s | Time: {2} | Left: {3} | {4}"
-        $global:lblAction.Text = $template -f $percent, $speed, $elapsedStr, $remainStr, $displayName
-        
-        # FORCE the label to actually show the text
-        $global:lblAction.Refresh()
     }
 
-    # Keep UI responsive
+    # --- Filename truncation ---
+    $displayName = if ($FileName.Length -gt 22) {
+        $FileName.Substring(0, 19) + "..."
+    } else { $FileName }
+
+    # --- Update label (no .Refresh() needed) ---
+    $global:lblAction.Text = "Progress: {0,3}% | {1,4} MB/s | Time: {2} | Left: {3} | {4}" -f `
+        $percent, $speed, $elapsedStr, $remainStr, $displayName
+
+    # --- DoEvents only when we actually update the text (much rarer) ---
     [System.Windows.Forms.Application]::DoEvents()
 }
 
@@ -720,67 +869,146 @@ function Set-Path {
 function Invoke-Audit {
     param($Path, $FileName)
     if (-not ([System.IO.Directory]::Exists($Path))) { return }
-    # --- ONE WIDTH TO RULE THEM ALL ---
-    $w = 88
 
-    # 1. Setup the UI Log (What you see in the window)
+    $w = $script:ReportWidth
+
+    # --- UI Header ---
     $global:Log.AppendText("`r`n" + ("=" * $w) + "`r`n")
     Update-Log "INITIATING AUDIT: $Path" $true
-    
-    # Template: {0}=ID, {1}=Name, {2}=Folder, {3}=Alias, {4}=Count, {5}=MB
-    $LogTemplate = "{0,-5} | {1,-25} | {2,-15} | {3,-15} | {4,5} | {5,7}"
-    $headerRow = $LogTemplate -f "ID", "System Name", "Folder", "Alias", "ROMs", "MB"
+
+    $LogTemplate = "{0,-5} | {1,-22} | {2,-15} | {3,-11} | {4,5} | {5,5} | {6,4} | {7,4} | {8,7}"
+    $headerRow = $LogTemplate -f "ID", "System Name", "Folder", "Alias", "Games", "Art", "List", "Supp", "MB"
     $global:Log.AppendText("$headerRow`r`n" + ("-" * $w) + "`r`n")
 
-    # 2. Setup the File Storage (What goes into Target.txt)
+    # --- File Storage ---
     $fileResults = @()
     $fileResults += "--- AUDIT REPORT: $Path ---"
     $fileResults += "Generated: $(Get-Date)"
     $fileResults += $headerRow
     $fileResults += ("-" * $w)
 
+    # CSV setup (only if enabled)
+    $csvResults = @()
+    if ($script:GenerateAuditCsv) {
+        $csvResults += "ID,SystemName,Folder,Alias,Games,Art,Lists,Support,SizeMB"
+    }
+
     $folders = Get-ChildItem $Path -Directory | Sort-Object Name
-    $totalSize = 0; $totalCount = 0
+    $totalGames = 0; $totalArt = 0; $totalList = 0; $totalSupport = 0; $totalSize = 0
 
     foreach ($folderObj in $folders) {
-        # 1. FILE COUNTING (Keep exactly as you had it)
-        $roms = Get-ChildItem $folderObj.FullName -File -Recurse | Where-Object { 
-            $ext = $_.Extension.ToLower()
-            ($global:RomExtensions -contains $ext) -and ($ext -ne ".png" -or $_.FullName -match "pico-8")
+
+        $allFiles = Get-ChildItem $folderObj.FullName -File -Recurse -ErrorAction SilentlyContinue
+
+        # ---- Categorize files (mutually exclusive) ----
+        $games    = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+        $boxart   = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+        $gamelist = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+        $support  = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+
+        foreach ($file in $allFiles) {
+            $ext = $file.Extension.ToLower()
+
+            if (($global:GameExtensions -contains $ext) -or 
+                ($ext -eq ".png" -and $file.FullName -match "pico-8")) {
+                $games.Add($file)
+            }
+            elseif ($global:BoxArtExtensions -contains $ext) {
+                $boxart.Add($file)
+            }
+            elseif ($global:GamelistExtensions -contains $ext) {
+                $gamelist.Add($file)
+            }
+            elseif ($global:SupportExtensions -contains $ext) {
+                $support.Add($file)
+            }
         }
-        
-        $sizeMB = [math]::Round(($roms | Measure-Object -Property Length -Sum).Sum / 1MB, 2)
-        $totalSize += $sizeMB; $totalCount += $roms.Count
-        
-        # 2. SMART DATABASE LOOKUP (Single-Match Version)
-        # We find all matches, then pick the one that matches the folder depth best
+
+        $sizeMB = if ($games.Count -gt 0) {
+            [math]::Round(($games | Measure-Object -Property Length -Sum).Sum / 1MB, 1)
+        } else { 0 }
+
+        # ---- Database lookup ----
         $allMatches = $global:SystemDatabase | Where-Object { 
             ($_.Folder -eq $folderObj.Name) -or ($_.Folder -split '[\\/]' -contains $folderObj.Name)
         }
-
-        # Pick the best match: Prefer exact matches over partial subfolder matches
         $dbMatch = $allMatches | Sort-Object { $_.Folder.Length } | Select-Object -First 1
 
-        $id = if ($dbMatch.ID) { $dbMatch.ID }    else { "???" }
-        $name = if ($dbMatch.Name) { $dbMatch.Name } else { "---" }
+        $id    = if ($dbMatch.ID)    { $dbMatch.ID }    else { "???" }
+        $name  = if ($dbMatch.Name)  { $dbMatch.Name }  else { "---" }
         $alias = if ($dbMatch.Alias) { $dbMatch.Alias } else { "---" }
 
-        # 3. LOGGING (Keep exactly as you had it)
-        $line = $LogTemplate -f $id, $name, $folderObj.Name, $alias, $roms.Count, $sizeMB
+        # ---- Output line (text report) ----
+        $line = $LogTemplate -f $id, $name, $folderObj.Name, $alias, 
+                               $games.Count, $boxart.Count, $gamelist.Count, $support.Count, $sizeMB
+
         $global:Log.AppendText("$line`r`n")
         $fileResults += $line
-        
+
+        # ---- CSV row ----
+        if ($script:GenerateAuditCsv) {
+            $csvResults += "$id,`"$name`",`"$($folderObj.Name)`",`"$alias`",$($games.Count),$($boxart.Count),$($gamelist.Count),$($support.Count),$sizeMB"
+        }
+
+        # Running totals
+        $totalGames   += $games.Count
+        $totalArt     += $boxart.Count
+        $totalList    += $gamelist.Count
+        $totalSupport += $support.Count
+        $totalSize    += $sizeMB
+
         [System.Windows.Forms.Application]::DoEvents()
     }
 
-    $summary = "`r`nSUMMARY: $totalCount Files | $([math]::Round($totalSize/1024,2)) GB"
+    # ============================================================
+    # TOTALS LINE
+    # ============================================================
+    $separator = ("-" * $w)
+    $global:Log.AppendText($separator + "`r`n")
+    $fileResults += $separator
+
+    $totalsLine = $LogTemplate -f "", "TOTALS", $folders.Count, "", 
+                                 $totalGames, $totalArt, $totalList, $totalSupport, 
+                                 ("{0:N1}" -f $totalSize)
+
+    $global:Log.AppendText($totalsLine + "`r`n")
+    $fileResults += $totalsLine
+
+if ($script:GenerateAuditCsv) {
+    $csvResults += "TOTALS,,$($folders.Count),,$totalGames,$totalArt,$totalList,$totalSupport,$([math]::Round($totalSize,1))"
+
+    # Summary line for CSV
+    $csvResults += "SUMMARY,$($folders.Count) Folders,$totalGames Games,$totalArt Art,$totalList Lists,$totalSupport Support,$([math]::Round($totalSize,1)) MB,($([math]::Round($totalSize / 1024, 2)) GB)"
+}
+
+    # ============================================================
+    # SUMMARY LINE
+    # ============================================================
+    $summary = "`r`nSUMMARY: $($folders.Count) Folders | $totalGames Games | $totalArt Art | $totalList Lists | $totalSupport Support | " +
+               "$([math]::Round($totalSize, 1)) MB ($([math]::Round($totalSize / 1024, 2)) GB)"
+
     $global:Log.AppendText($summary + "`r`n" + ("=" * $w) + "`r`n")
     $fileResults += $summary
+    $fileResults += ("=" * $w)
 
-    # --- SAVE FILE ---
-    $OutputPath = Join-Path $Path $FileName
-    $fileResults | Out-File $OutputPath -Force -Encoding utf8
-    Update-Log "FILE SAVED: $OutputPath"
+# ============================================================
+# SAVE FILES
+# ============================================================
+
+# Text report
+if ($script:GenerateAuditTxt) {
+    $OutputPathTxt = Join-Path $Path $FileName
+    $fileResults | Out-File -FilePath $OutputPathTxt -Force -Encoding utf8
+    Update-Log "TEXT REPORT SAVED: $OutputPathTxt"
+}
+
+# CSV report
+if ($script:GenerateAuditCsv) {
+    $csvFileName = [System.IO.Path]::ChangeExtension($FileName, ".csv")
+    $OutputPathCsv = Join-Path $Path $csvFileName
+    $csvResults | Out-File -FilePath $OutputPathCsv -Force -Encoding utf8
+    Update-Log "CSV REPORT SAVED:  $OutputPathCsv"
+}
 }
 
 # Function 4.5.1: Report Generation Orchestrator, Master first, Target Second
@@ -1338,14 +1566,14 @@ function Show-HelpManual {
     $global:Log.Clear()
 
     # In your Startup or Help function:
-    $global:Log.AppendText($HeaderArt + "`r`n")
+    $global:Log.AppendText($HeaderArt + "`r`n`r`n")
 
     # 2. Add 2 blank lines for "Breathing Room"
     $global:Log.AppendText("`r`n`r`n") 
 
-    $hr = "=" * 100
+    $hr = "=" * $script:ReportWidth
     $global:Log.AppendText("$hr`r`n")   
-    $global:Log.AppendText(" ARKOS UTILITY - QUICK REFERENCE GUIDE`r`n")
+    $global:Log.AppendText("                            *****ARKOS UTILITY - QUICK REFERENCE GUIDE*****`r`n")
     $global:Log.AppendText("$hr`r`n`r`n")
 
     
@@ -1360,7 +1588,7 @@ function Show-HelpManual {
         @{ Cmd = "[ PWR CLONE ]"  ; Desc = "BRUTE FORCE. Options: Folders Only, ROMs Only, System Only, or EVERYTHING." },
         @{ Cmd = " (System Only)" ; Desc = "Clones BIOS, Ports, Themes, and Tools folders with sub-folders only." },
         @{ Cmd = " (ROMs Only)"   ; Desc = "Clones ROMs only.  Geared for SD2 setups (Skips BIOS, Ports, and Tools)." },
-        @{ Cmd = "[ SYS AUDIT ]"  ; Desc = "Generates a pipe-separated report (.txt) for review or spreadsheet import." },
+        @{ Cmd = "[ SYS AUDIT ]"  ; Desc = "Generates a pipe-separated report (.txt) for review or (.csv) for import." },
         @{ Cmd = "[ ABORT ]"      ; Desc = "Halts/Pauses the current operation. Re-click the operation to resume." },
         @{ Cmd = "[ GEN xxxOS ]"  ; Desc = "Creates the specific folder structure for ArkOS / dArkOS / dArkOS-RE." },
         @{ Cmd = "[ G350 Src  ]"  ; Desc = "Uses a stock G350 SD card as the source to append a clean ArkOS structure." },
@@ -1373,12 +1601,12 @@ function Show-HelpManual {
     }
     
     $global:Log.AppendText("`r`n$hr`r`n")
-    # $global:Log.AppendText(" TIP: Hover over the [?] icons for specific system help.`r`n")
     $global:Log.AppendText("       **This tool is continually under development.  Use with CAUTION, at your own risk.**`r`n")
     $global:Log.AppendText("$hr")
+
 }
 
-# 4.5 Check4Update Set your current version
+# 4.14 Check4Update Set your current version
 function Test-Update {
     try {
         $ping = New-Object System.Net.NetworkInformation.Ping
@@ -1497,6 +1725,176 @@ function Test-Update {
     } 
 }
 
+# ============================================================
+# Function 4.15: SD Card / USB Speed Benchmark (WinSAT)
+# ============================================================
+Add-Type -AssemblyName Microsoft.VisualBasic
+function Invoke-SdBenchmark {
+    # --- Admin check ---
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).
+            IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Update-Log "WARNING: Not running as Administrator. WinSAT may fail."
+}
+
+    $w = $script:ReportWidth
+
+    # --- Header in log ---
+    $global:Log.AppendText("`r`n" + ("=" * $w) + "`r`n")
+    Update-Log "INITIATING SD CARD SPEED TEST" $true
+
+    # --- User input via pop-ups ---
+    $cardModel = [Microsoft.VisualBasic.Interaction]::InputBox(
+        "Enter Card / Device Model`n(e.g. Lexar Silver 64GB, Samsung EVO 256GB)",
+        "SD Card Benchmark",
+        "")
+
+    if ([string]::IsNullOrWhiteSpace($cardModel)) {
+        Update-Log "Test cancelled by user."
+        return
+    }
+
+    $driveInput = [Microsoft.VisualBasic.Interaction]::InputBox(
+        "Enter Drive Letter (e.g. F: or G:)",
+        "SD Card Benchmark",
+        "")
+
+    if ([string]::IsNullOrWhiteSpace($driveInput)) {
+        Update-Log "Test cancelled by user."
+        return
+    }
+
+    $driveLetter = ($driveInput -replace '[:\\]', '').ToUpper()
+    if ($driveLetter -notmatch '^[A-Z]$') {
+        Update-Log "Invalid drive letter. Test aborted."
+        return
+    }
+
+    $drivePath = "${driveLetter}:"
+    if (-not (Test-Path $drivePath)) {
+        Update-Log "Drive $drivePath not found or not accessible. Test aborted."
+        return
+    }
+
+    Update-Log "Card Model : $cardModel"
+    Update-Log "Drive      : $drivePath"
+    Update-Log "Running WinSAT (this usually takes 15-90 seconds)..."
+    [System.Windows.Forms.Application]::DoEvents()
+
+    # --- Run WinSAT ---
+    try {
+        $rawOutput = & winsat.exe disk -drive $driveLetter 2>&1
+    }
+    catch {
+        Update-Log "ERROR running winsat: $_"
+        return
+    }
+
+    Update-Log "WinSAT finished. Parsing results..."
+
+    # --- Parse results ---
+    $seqRead = $null; $seqReadScore = $null
+    $seqWrite = $null; $seqWriteScore = $null
+    $ranRead = $null; $ranReadScore = $null
+    $totalRunTime = $null
+    $latSeqWrite = $null; $lat95 = $null; $latMax = $null; $latRanWrite = $null
+
+    foreach ($line in $rawOutput) {
+        if ($line -match 'Disk\s+Sequential\s+64\.0\s+Read\s+([\d\.]+)\s+MB/s\s+([\d\.]+)') {
+            $seqRead = [double]$Matches[1]; $seqReadScore = [double]$Matches[2]
+        }
+        elseif ($line -match 'Disk\s+Sequential\s+64\.0\s+Write\s+([\d\.]+)\s+MB/s\s+([\d\.]+)') {
+            $seqWrite = [double]$Matches[1]; $seqWriteScore = [double]$Matches[2]
+        }
+        elseif ($line -match 'Disk\s+Random\s+16\.0\s+Read\s+([\d\.]+)\s+MB/s\s+([\d\.]+)') {
+            $ranRead = [double]$Matches[1]; $ranReadScore = [double]$Matches[2]
+        }
+        elseif ($line -match 'Total Run Time\s+(\d{2}:\d{2}:\d{2}\.\d{2})') {
+            $totalRunTime = $Matches[1]
+        }
+        elseif ($line -match 'Average Read Time with Sequential Writes\s+([\d\.]+)\s+ms\s+([\d\.]+)') {
+            $latSeqWrite = [double]$Matches[2]
+        }
+        elseif ($line -match 'Latency:\s+95th Percentile\s+([\d\.]+)\s+ms\s+([\d\.]+)') {
+            $lat95 = [double]$Matches[2]
+        }
+        elseif ($line -match 'Latency:\s+Maximum\s+([\d\.]+)\s+ms\s+([\d\.]+)') {
+            $latMax = [double]$Matches[2]
+        }
+        elseif ($line -match 'Average Read Time with Random Writes\s+([\d\.]+)\s+ms\s+([\d\.]+)') {
+            $latRanWrite = [double]$Matches[2]
+        }
+    }
+
+    # --- Averages ---
+    $speedScores   = @($seqReadScore, $seqWriteScore, $ranReadScore) | Where-Object { $_ -ne $null }
+    $latencyScores = @($latSeqWrite, $lat95, $latMax, $latRanWrite) | Where-Object { $_ -ne $null }
+
+    $speedAvg    = if ($speedScores.Count)   { [math]::Round(($speedScores   | Measure-Object -Average).Average, 1) } else { $null }
+    $latencyAvg  = if ($latencyScores.Count) { [math]::Round(($latencyScores | Measure-Object -Average).Average, 1) } else { $null }
+    $overallAvg  = if (($speedScores + $latencyScores).Count) {
+        [math]::Round((($speedScores + $latencyScores) | Measure-Object -Average).Average, 1)
+    } else { $null }
+
+    # --- Build report ---
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $report = @()
+    $report += ("=" * $w)
+    $report += "  SD CARD BENCHMARK REPORT"
+    $report += ("=" * $w)
+    $report += "Date/Time     : $timestamp"
+    $report += "Card Model    : $cardModel"
+    $report += "Drive Letter  : $driveLetter`:"
+    $report += "Total Run Time: $totalRunTime"
+    $report += ("-" * $w)
+    $report += ""
+    $report += ('  Sequential 64K Read  : {0:N2} MB/s   (Score {1})' -f $seqRead,  $seqReadScore)
+    $report += ('  Sequential 64K Write : {0:N2} MB/s   (Score {1})' -f $seqWrite, $seqWriteScore)
+    $report += ('  Random 16K Read      : {0:N2} MB/s   (Score {1})' -f $ranRead,  $ranReadScore)
+    $report += ('  Speed Average        : {0}' -f $speedAvg)
+    $report += ""
+    $report += ('  Latency Average      : {0}' -f $latencyAvg)
+    $report += ('  Overall Average      : {0}' -f $overallAvg)
+    $report += ""
+    $report += ("-" * $w)
+    $report += "Notes: Higher MB/s and Score is better. Scores are WinSAT 1.0-9.9 scale."
+    $report += "Rating: 7.0+ = Excellent | 6.0-6.9 = Good | 5.0-5.9 = Average | Below 5.0 = Slow"
+    $report += ("=" * $w)
+
+    # --- Show in log window ---
+    foreach ($line in $report) {
+        $global:Log.AppendText("$line`r`n")
+    }
+    $global:Log.AppendText("`r`n")
+
+    # --- Save files (respect toggles) ---
+    $safeName = ($cardModel -replace '[\\/:*?"<>|]', '_').Trim()
+
+    if ($script:GenerateSdTxt) {
+        $txtPath = Join-Path $PSScriptRoot ("SDCard_{0}_{1:yyyyMMdd_HHmmss}.txt" -f $safeName, (Get-Date))
+        $report | Out-File -FilePath $txtPath -Encoding utf8 -Force
+        Update-Log "TEXT REPORT SAVED: $txtPath"
+    }
+
+    if ($script:GenerateSdCsv) {
+        $CsvPath = Join-Path $PSScriptRoot "SDCard_Benchmark.csv"
+        $csvHeader = "Date,CardModel,DriveLetter,SeqRead_MBps,SeqRead_Score,SeqWrite_MBps,SeqWrite_Score,RanRead_MBps,RanRead_Score,SpeedAvg,LatencyAvg,OverallAvg,TotalRunTime"
+
+        $csvRow = '"{0}","{1}","{2}",{3},{4},{5},{6},{7},{8},{9},{10},{11},"{12}"' -f `
+            $timestamp, $cardModel, "$driveLetter`:", `
+            $seqRead, $seqReadScore, $seqWrite, $seqWriteScore, $ranRead, $ranReadScore, `
+            $speedAvg, $latencyAvg, $overallAvg, $totalRunTime
+
+        if (-not (Test-Path $CsvPath)) {
+            $csvHeader | Out-File -FilePath $CsvPath -Encoding utf8
+        }
+        Add-Content -Path $CsvPath -Value $csvRow -Encoding utf8
+        Update-Log "CSV RESULTS APPENDED: $CsvPath"
+    }
+
+    Update-Log "SD CARD SPEED TEST COMPLETE"
+}
+
 # ==============================================================================
 # SECTION 5: THE NERVOUS SYSTEM (Event Handlers)
 # ==============================================================================
@@ -1600,6 +1998,13 @@ $global:btnGenG350.Add_Click({
         }
     })
 
+    $global:chkToggleAtxt.Add_CheckedChanged({
+    $script:GenerateAuditTxt = $global:chkToggleAtxt.Checked
+})
+
+$global:chkToggleAcsv.Add_CheckedChanged({
+    $script:GenerateAuditCsv = $global:chkToggleAcsv.Checked
+})
 
 # --- 5.4: UTILITY & SAFETY EVENTS ---
 # Audit now handles the file generation logic
@@ -1618,6 +2023,18 @@ $global:btnAbort.Add_Click({
     
         Update-Log "!!! ABORT COMMAND ISSUED !!!" $true
     })
+
+# WinSAT SPEED TEST Event handlers
+$global:btnSDSpeed.Add_Click({
+    Invoke-SdBenchmark
+})
+    $global:chkToggleStxt.Add_CheckedChanged({
+    $script:GenerateSdTxt = $global:chkToggleStxt.Checked
+})
+
+$global:chkToggleScsv.Add_CheckedChanged({
+    $script:GenerateSdCsv = $global:chkToggleScsv.Checked
+})
 
 # This is now your "Master Reset"
 $global:btnReset.Add_Click({   
@@ -1673,6 +2090,9 @@ $global:Form.Controls.AddRange(@(
         $global:btnPowerClone,
         $global:gbCloneMode, 
         $global:btnAudit,
+        $global:gbToggleAudit,
+        $global:btnSDSpeed,
+        $global:gbToggleSDSpeed,
         $global:lblAction, 
         $global:ProgressBar, 
         $global:Log, 

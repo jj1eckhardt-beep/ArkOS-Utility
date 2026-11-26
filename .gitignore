@@ -20,19 +20,36 @@ credentials/
 *.tmp
 *.log
 *.bak
+*.old
 
 # ==========================================
 # 3. WINDOWS OS CLEANUP
 # ==========================================
 Thumbs.db
-.DS_Store
 ehthumbs.db
+Desktop.ini
+.DS_Store
 
 # ==========================================
 # 4. BUILD / OUTPUT ARTIFACTS
 # ==========================================
-# If you compile your scripts to executables or bundles, ignore the output folder
 bin/
 obj/
 dist/
 out/
+
+# ==========================================
+# 5. PROJECT-SPECIFIC WORKING FOLDERS
+# ==========================================
+.Archive/
+.cline/
+AI_Working/
+
+# ==========================================
+# 6. OPTIONAL - Generated reports
+# ==========================================
+SDCard_*.txt
+SDCard_Benchmark.csv
+# *Audit*.csv
+# *Audit*.txt
+
